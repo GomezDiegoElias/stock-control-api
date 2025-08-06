@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/core/">
+    <Project Path="src/org.pos.software/org.pos.software.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="test/org.pos.software.test/org.pos.software.test.csproj" Id="035b72af-27ae-48e1-a6cb-ed3d2c6f729c" />
+  </Folder>
+</Solution>

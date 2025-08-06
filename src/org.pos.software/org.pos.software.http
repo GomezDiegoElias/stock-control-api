@@ -1,0 +1,6 @@
+@url = http://localhost:5027
+
+GET {{url}}/api/v1/weather
+Accept: application/json
+
+###
