@@ -4,3 +4,8 @@ GET {{url}}/api/v1/weather
 Accept: application/json
 
 ###
+
+GET {{url}}/api/v1/users
+Accept: application/json
+
+###
