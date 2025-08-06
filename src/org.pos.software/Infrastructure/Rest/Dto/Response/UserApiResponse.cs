@@ -1,6 +1,4 @@
 ﻿namespace org.pos.software.Infrastructure.Rest.Dto.Response
 {
-    public class UserApiResponse
-    {
-    }
+    public record UserApiResponse(string FirstName, string Country) { }
 }
