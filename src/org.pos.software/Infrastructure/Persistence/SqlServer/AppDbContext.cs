@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using org.pos.software.Infrastructure.Persistence.Entities;
+using org.pos.software.Infrastructure.Persistence.SqlServer.Entities;
 
-namespace org.pos.software.Infrastructure.Persistence
+namespace org.pos.software.Infrastructure.Persistence.SqlServer
 {
     public class AppDbContext : DbContext
     {

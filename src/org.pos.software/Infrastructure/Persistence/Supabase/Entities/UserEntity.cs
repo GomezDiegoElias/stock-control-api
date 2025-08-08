@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
-namespace org.pos.software.Infrastructure.Persistence.Entities
+namespace org.pos.software.Infrastructure.Persistence.Supabase.Entities
 {
+
     [Table("tbl_user")]
     public class UserEntity
     {
@@ -12,12 +14,9 @@ namespace org.pos.software.Infrastructure.Persistence.Entities
         [Column("id")]
         public int Id { get; set; }
 
-        [Required]
-        [MaxLength(50)]
         [Column("first_name")]
         public string FirstName { get; set; }
 
-        [MaxLength(50)]
         [Column("country")]
         public string Country { get; set; }
 

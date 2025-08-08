@@ -9,3 +9,8 @@ GET {{url}}/api/v1/users
 Accept: application/json
 
 ###
+
+GET {{url}}/api/v1/users/2
+Accept: application/json
+
+###

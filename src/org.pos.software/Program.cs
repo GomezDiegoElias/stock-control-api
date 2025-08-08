@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using org.pos.software.Application.Ports;
 using org.pos.software.Application.Services;
-using org.pos.software.Infrastructure.Persistence;
-using org.pos.software.Infrastructure.Persistence.Repositories;
+using org.pos.software.Infrastructure.Persistence.SqlServer;
+using org.pos.software.Infrastructure.Persistence.Supabase;
+using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
+using org.pos.software.Infrastructure.Persistence.Supabase.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,24 +29,76 @@ builder.Services.AddSwaggerGen(c =>
 
 // Configuracion de la base de datos
 var configuration = builder.Configuration;
-var bdConnectionString = configuration.GetValue<string>("CONNECTION_DEFAULT")
-    ?? throw new InvalidOperationException("Error de conexion con la base de datos");
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(bdConnectionString)
-);
+var dbProvider = configuration.GetValue<string>("Database:Provider"); // SqlServer o Supabase
 
-// Inyeccion de dependencias
-builder.Services.AddScoped<UserRepository>();
+if (dbProvider == "SqlServer")
+{
+
+    var bdConnectionString = configuration.GetValue<string>("CONNECTION_SQLSERVER")
+        ?? throw new InvalidOperationException("Error al obtener la cadena de conexion");
+
+    builder.Services.AddDbContext<AppDbContext>(options =>
+        options.UseSqlServer(bdConnectionString)
+    );
+
+    // Inyeccion de dependencias
+    builder.Services.AddScoped<UserRepository>();
+
+} else if (dbProvider == "Supabase")
+{
+ 
+    //builder.Services.AddDbContext<SupabaseDbContext>(options =>
+    //    options.UseNpgsql(configuration.GetConnectionString("CONNECTION_SUPABASE"))
+    //);
+
+    var bdConnectionString = configuration.GetValue<string>("CONNECTION_SUPABASE")
+        ?? throw new InvalidOperationException("Error al obtener la cadena de conexion");
+
+    //builder.Services.AddDbContext<SupabaseDbContext>(options =>
+    //    options.UseNpgsql(bdConnectionString)
+    //);
+
+    //bdConnectionString += ";Pooling=true;Minimum Pool Size=1;Maximum Pool Size=20;Ssl Mode=Require;Trust Server Certificate=true";
+
+    builder.Services.AddDbContext<SupabaseDbContext>(options =>
+        options.UseNpgsql(bdConnectionString, npgsqlOptions =>
+        {
+            npgsqlOptions.CommandTimeout(120); // 2 minutos
+        })
+    );
+
+
+    // Inyeccion de dependencias
+    builder.Services.AddScoped<SupabaseUserRepository>();
+
+}
+
 builder.Services.AddScoped<IUserService, UserService>();
 
-var app = builder.Build();
+
+var app = builder.Build(); //////////////////////////////////////////////////////// VAR APP = BUILDER.BUILD();
 
 // Migraciones y creacion de la base de datos
+//using (var scope = app.Services.CreateScope())
+//{
+//    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+//    dbContext.Database.EnsureCreated();
+//}
+
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    dbContext.Database.EnsureCreated();
+    var dbProviderr = app.Configuration.GetValue<string>("Database:Provider"); // SqlServer o Supabase
+    if (dbProviderr == "SqlServer")
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        dbContext.Database.EnsureCreated();
+    }
+    else if (dbProviderr == "Supabase")
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<SupabaseDbContext>();
+        dbContext.Database.EnsureCreated();
+    }
 }
 
 if (app.Environment.IsDevelopment())
