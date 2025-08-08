@@ -20,17 +20,6 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             this.userService = userService;
         }
 
-        //[HttpGet]
-        //public async Task<ActionResult<List<UserApiResponse>>> getAllUsers()
-        //{
-
-        //    List<User> users = await userService.FindAllUsers();
-        //    List<UserApiResponse> response = users.Select(user => UserMapper.ToResponse(user)).ToList();
-
-        //    return Ok(response);
-
-        //}
-
         [HttpGet]
         public async Task<ActionResult<List<UserApiResponse>>> getAllUsers()
         {

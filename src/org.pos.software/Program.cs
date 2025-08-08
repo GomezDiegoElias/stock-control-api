@@ -7,6 +7,8 @@ using org.pos.software.Infrastructure.Persistence.SqlServer;
 using org.pos.software.Infrastructure.Persistence.Supabase;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
 using org.pos.software.Infrastructure.Persistence.Supabase.Repositories;
+using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
+using org.pos.software.Infrastructure.Persistence.MySql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,9 +74,22 @@ if (dbProvider == "SqlServer")
     // Inyeccion de dependencias
     builder.Services.AddScoped<SupabaseUserRepository>();
 
+} else if (dbProvider == "MySql")
+{
+
+    var bdConnectionString = configuration.GetValue<string>("CONNECTION_MYSQL")
+        ?? throw new InvalidOperationException("Error al obtener la cadena de conexion");
+
+    builder.Services.AddDbContext<MySqlDbContext>(options =>
+        options.UseMySQL(bdConnectionString)
+    );
+
+    // Inyeccion de dependencias
+    builder.Services.AddScoped<MySqlUserRepository>();
+
 }
 
-builder.Services.AddScoped<IUserService, UserService>();
+    builder.Services.AddScoped<IUserService, UserService>();
 
 
 var app = builder.Build(); //////////////////////////////////////////////////////// VAR APP = BUILDER.BUILD();
@@ -88,15 +103,18 @@ var app = builder.Build(); /////////////////////////////////////////////////////
 
 using (var scope = app.Services.CreateScope())
 {
-    var dbProviderr = app.Configuration.GetValue<string>("Database:Provider"); // SqlServer o Supabase
-    if (dbProviderr == "SqlServer")
+    if (dbProvider == "SqlServer")
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         dbContext.Database.EnsureCreated();
     }
-    else if (dbProviderr == "Supabase")
+    else if (dbProvider == "Supabase")
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<SupabaseDbContext>();
+        dbContext.Database.EnsureCreated();
+    } else if (dbProvider == "MySql")
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<MySqlDbContext>();
         dbContext.Database.EnsureCreated();
     }
 }
