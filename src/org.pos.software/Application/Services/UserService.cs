@@ -9,18 +9,12 @@ namespace org.pos.software.Application.Services
     public class UserService : IUserService
     {
 
+        // Inyeccion del repositorio
+
         // SqlServer repository
-        //private readonly UserRepository _userRepository; 
+        //private readonly UserRepository _userRepository;
 
         //public UserService(UserRepository userRepository)
-        //{
-        //    _userRepository = userRepository;
-        //}
-
-        // Supabase repository
-        //private readonly SupabaseUserRepository _userRepository; 
-
-        //public UserService(SupabaseUserRepository userRepository)
         //{
         //    _userRepository = userRepository;
         //}
@@ -33,6 +27,15 @@ namespace org.pos.software.Application.Services
             _userRepository = userRepository;
         }
 
+        // Supabase repository
+        //private readonly SupabaseUserRepository _userRepository; 
+
+        //public UserService(SupabaseUserRepository userRepository)
+        //{
+        //    _userRepository = userRepository;
+        //}
+
+        // metodos
         public async Task<List<User>> FindAllUsers()
         {
             return await _userRepository.FindAll();

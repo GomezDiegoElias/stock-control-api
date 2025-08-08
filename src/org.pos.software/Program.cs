@@ -1,123 +1,17 @@
-using Microsoft.EntityFrameworkCore;
-using org.pos.software.Application.Ports;
-using org.pos.software.Application.Services;
-using org.pos.software.Infrastructure.Persistence.SqlServer;
-using org.pos.software.Infrastructure.Persistence.Supabase;
-using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
-using org.pos.software.Infrastructure.Persistence.Supabase.Repositories;
-using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
-using org.pos.software.Infrastructure.Persistence.MySql;
+using org.pos.software.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
+// Configuración básica de servicios
 builder.Services.AddControllers();
-//builder.Services.AddOpenApi();
 
-// Configuracion de Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "POS Software API",
-        Version = "v1",
-        Description = "API para el software de punto de venta (POS)",
-    });
-});
+// Configuraciones modulares de servicios
+SwaggerConfig.ConfigureServices(builder.Services);
+DependencyInjection.ConfigureServices(builder.Services, builder.Configuration);
 
-// Configuracion de la base de datos y repositorios segun el proveedor seleccionado
-var configuration = builder.Configuration;
+var app = builder.Build();
 
-// Leer el proveedor de base de datos desde appsettings.json o variables de entorno
-var dbProvider = configuration.GetValue<string>("Database:Provider");
+// Configuración del middleware
+MiddlewareConfig.Configure(app, builder.Configuration);
 
-if (dbProvider == "SqlServer")
-{
-
-    var bdConnectionString = configuration.GetValue<string>("CONNECTION_SQLSERVER")
-        ?? throw new InvalidOperationException("Error al obtener la cadena de conexion");
-
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseSqlServer(bdConnectionString)
-    );
-
-    // Inyeccion de dependencias
-    builder.Services.AddScoped<UserRepository>();
-
-} else if (dbProvider == "Supabase")
-{
-
-    var bdConnectionString = configuration.GetValue<string>("CONNECTION_SUPABASE")
-        ?? throw new InvalidOperationException("Error al obtener la cadena de conexion");
-
-    builder.Services.AddDbContext<SupabaseDbContext>(options =>
-        options.UseNpgsql(bdConnectionString, npgsqlOptions =>
-        {
-            npgsqlOptions.CommandTimeout(120); // 2 minutos
-        })
-    );
-
-    // Inyeccion de dependencias
-    builder.Services.AddScoped<SupabaseUserRepository>();
-
-} else if (dbProvider == "MySql")
-{
-
-    var bdConnectionString = configuration.GetValue<string>("CONNECTION_MYSQL")
-        ?? throw new InvalidOperationException("Error al obtener la cadena de conexion");
-
-    builder.Services.AddDbContext<MySqlDbContext>(options =>
-        options.UseMySQL(bdConnectionString)
-    );
-
-    // Inyeccion de dependencias
-    builder.Services.AddScoped<MySqlUserRepository>();
-
-}
-
-// Inyeccion de dependencias de los servicios
-builder.Services.AddScoped<IUserService, UserService>();
-
-var app = builder.Build(); //////////////////////////////////////////////////////// VAR APP = BUILDER.BUILD();
-
-// Asegurar que la base de datos este creada
-using (var scope = app.Services.CreateScope())
-{
-    if (dbProvider == "SqlServer")
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        dbContext.Database.EnsureCreated();
-    }
-    else if (dbProvider == "Supabase")
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<SupabaseDbContext>();
-        dbContext.Database.EnsureCreated();
-    } else if (dbProvider == "MySql")
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<MySqlDbContext>();
-        dbContext.Database.EnsureCreated();
-    }
-}
-
-// Configuracion del pipeline de peticiones HTTP.
-if (app.Environment.IsDevelopment())
-{
-    app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "POS Software API v1");
-        c.DisplayOperationId();
-        c.DisplayRequestDuration();
-        c.EnableDeepLinking();
-        c.EnableFilter();
-        c.ShowExtensions();
-    });
-}
-
-app.UseHttpsRedirection();
-app.UseAuthorization();
-app.MapControllers();
 app.Run();
