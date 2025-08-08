@@ -1,6 +1,4 @@
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using org.pos.software.Application.Ports;
 using org.pos.software.Application.Services;
 using org.pos.software.Infrastructure.Persistence.SqlServer;
@@ -29,10 +27,11 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configuracion de la base de datos
+// Configuracion de la base de datos y repositorios segun el proveedor seleccionado
 var configuration = builder.Configuration;
 
-var dbProvider = configuration.GetValue<string>("Database:Provider"); // SqlServer o Supabase
+// Leer el proveedor de base de datos desde appsettings.json o variables de entorno
+var dbProvider = configuration.GetValue<string>("Database:Provider");
 
 if (dbProvider == "SqlServer")
 {
@@ -49,19 +48,9 @@ if (dbProvider == "SqlServer")
 
 } else if (dbProvider == "Supabase")
 {
- 
-    //builder.Services.AddDbContext<SupabaseDbContext>(options =>
-    //    options.UseNpgsql(configuration.GetConnectionString("CONNECTION_SUPABASE"))
-    //);
 
     var bdConnectionString = configuration.GetValue<string>("CONNECTION_SUPABASE")
         ?? throw new InvalidOperationException("Error al obtener la cadena de conexion");
-
-    //builder.Services.AddDbContext<SupabaseDbContext>(options =>
-    //    options.UseNpgsql(bdConnectionString)
-    //);
-
-    //bdConnectionString += ";Pooling=true;Minimum Pool Size=1;Maximum Pool Size=20;Ssl Mode=Require;Trust Server Certificate=true";
 
     builder.Services.AddDbContext<SupabaseDbContext>(options =>
         options.UseNpgsql(bdConnectionString, npgsqlOptions =>
@@ -69,7 +58,6 @@ if (dbProvider == "SqlServer")
             npgsqlOptions.CommandTimeout(120); // 2 minutos
         })
     );
-
 
     // Inyeccion de dependencias
     builder.Services.AddScoped<SupabaseUserRepository>();
@@ -89,18 +77,12 @@ if (dbProvider == "SqlServer")
 
 }
 
-    builder.Services.AddScoped<IUserService, UserService>();
-
+// Inyeccion de dependencias de los servicios
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build(); //////////////////////////////////////////////////////// VAR APP = BUILDER.BUILD();
 
-// Migraciones y creacion de la base de datos
-//using (var scope = app.Services.CreateScope())
-//{
-//    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-//    dbContext.Database.EnsureCreated();
-//}
-
+// Asegurar que la base de datos este creada
 using (var scope = app.Services.CreateScope())
 {
     if (dbProvider == "SqlServer")
@@ -119,6 +101,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+// Configuracion del pipeline de peticiones HTTP.
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -133,7 +116,6 @@ if (app.Environment.IsDevelopment())
         c.ShowExtensions();
     });
 }
-
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
