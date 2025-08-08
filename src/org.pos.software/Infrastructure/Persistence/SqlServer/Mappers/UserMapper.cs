@@ -1,8 +1,8 @@
 ﻿using org.pos.software.Domain.Entities;
-using org.pos.software.Infrastructure.Persistence.Entities;
+using org.pos.software.Infrastructure.Persistence.SqlServer.Entities;
 using org.pos.software.Infrastructure.Rest.Dto.Response;
 
-namespace org.pos.software.Infrastructure.Persistence.Mappers
+namespace org.pos.software.Infrastructure.Persistence.SqlServer.Mappers
 {
     public static class UserMapper
     {
