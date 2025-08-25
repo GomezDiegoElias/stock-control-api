@@ -11,8 +11,11 @@ public static class MiddlewareConfig
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-            SwaggerConfig.ConfigureUI(app);
+            // SwaggerConfig.ConfigureUI(app);
         }
+
+        // Swagger en TODOS los entornos (Desarrollo, Pruebas, Producción)
+        SwaggerConfig.ConfigureUI(app);
 
         // Common middleware
         app.UseHttpsRedirection();
