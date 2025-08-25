@@ -14,4 +14,18 @@ var app = builder.Build();
 // Configuración del middleware
 MiddlewareConfig.Configure(app, builder.Configuration);
 
+app.MapGet("/", () =>
+{
+
+    var currentTime = DateTime.Now.ToString("HH:mm:ss");
+
+    return Results.Ok(new
+    {
+        message = "¡API Funcionando!",
+        time = currentTime,
+        status = true
+    });
+
+});
+
 app.Run();

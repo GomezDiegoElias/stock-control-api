@@ -21,28 +21,47 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<UserApiResponse>>> getAllUsers()
+        public async Task<ActionResult<StandardResponse<List<UserApiResponse>>>> getAllUsers()
         {
 
             List<User> users = await userService.FindAllUsers();
             List<UserApiResponse> response = users.Select(user => UserMapper.ToResponse(user)).ToList();
 
-            return Ok(response);
+            return Ok(new StandardResponse<List<UserApiResponse>>(
+                Success: true,
+                Message: "Users retrieved successfully",
+                Data: response
+            ));
 
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<UserApiResponse>> getUserById(int id)
+        public async Task<ActionResult<StandardResponse<UserApiResponse>>> getUserById(int id)
         {
+
             try
             {
                 User user = await userService.FindById(id);
-                UserApiResponse response = SupabaseUserMapper.ToResponse(user);
-                return Ok(response);
+                UserApiResponse response = UserMapper.ToResponse(user);
+                return Ok(new StandardResponse<UserApiResponse>(
+                    Success: true,
+                    Message: "User retrieved successfully",
+                    Data: response
+                ));
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return NotFound(new StandardResponse<UserApiResponse>(
+                    Success: false,
+                    Message: "User not found",
+                    Data: null,
+                    Error: new ErrorDetails(
+                            Message: "User with the specified ID does not exist.",
+                            Details: $"No user found with ID {id}.",
+                            Path: HttpContext.Request.Path
+                        ),
+                    Status: 404
+                ));
             }
 
         }
