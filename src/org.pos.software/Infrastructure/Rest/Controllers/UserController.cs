@@ -3,6 +3,7 @@ using org.pos.software.Application.Ports;
 using org.pos.software.Domain.Entities;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
 using org.pos.software.Infrastructure.Persistence.Supabase.Mappers;
+using org.pos.software.Infrastructure.Rest.Dto.Request;
 using org.pos.software.Infrastructure.Rest.Dto.Response;
 
 namespace org.pos.software.Infrastructure.Rest.Controllers
@@ -21,7 +22,7 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<StandardResponse<List<UserApiResponse>>>> getAllUsers()
+        public async Task<ActionResult<StandardResponse<List<UserApiResponse>>>> GetAllUsers()
         {
 
             List<User> users = await userService.FindAllUsers();
@@ -36,7 +37,7 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<StandardResponse<UserApiResponse>>> getUserById(int id)
+        public async Task<ActionResult<StandardResponse<UserApiResponse>>> GetUserById(int id)
         {
 
             try
@@ -57,7 +58,7 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
                     Data: null,
                     Error: new ErrorDetails(
                             Message: "User with the specified ID does not exist.",
-                            Details: $"No user found with ID {id}.",
+                            Details: $"Someting went wrong. {ex.Message}",
                             Path: HttpContext.Request.Path
                         ),
                     Status: 404
@@ -65,6 +66,32 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             }
 
         }
+
+        [HttpPost]
+        public async Task<ActionResult<StandardResponse<UserApiResponse>>> CreateUser([FromBody] UserApiRequest request)
+        {
+
+            User user = new User
+            {
+                FirstName = request.Firstname,
+                Country = request.Country
+            };
+            User createdUser = await userService.CreateUser(user);
+            UserApiResponse response = UserMapper.ToResponse(createdUser);
+            return CreatedAtAction(
+                nameof(GetUserById),
+                new { id = createdUser.Id },
+                new StandardResponse<UserApiResponse>(
+                    Success: true,
+                    Message: "User created successfully",
+                    Data: response,
+                    Status: 201
+                )
+            );
+
+        }
+
+        // //////////////////////////////////////////
 
     }
 }

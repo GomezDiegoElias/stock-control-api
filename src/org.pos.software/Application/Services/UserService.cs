@@ -46,5 +46,10 @@ namespace org.pos.software.Application.Services
             return await _userRepository.FindById(id);
         }
 
+        public Task<User> CreateUser(User user)
+        {
+            return _userRepository.Save(user);
+        }
+
     }
 }

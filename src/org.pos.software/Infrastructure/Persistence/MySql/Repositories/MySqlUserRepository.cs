@@ -1,10 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using org.pos.software.Domain.Entities;
+using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Persistence.MySql.Mappers;
 
 namespace org.pos.software.Infrastructure.Persistence.MySql.Repositories
 {
-    public class MySqlUserRepository
+    public class MySqlUserRepository : IUserRepository
     {
 
         private readonly MySqlDbContext _context;
@@ -27,5 +28,12 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Repositories
             return MySqlUserMapper.ToDomain(entity);
         }
 
+        public async Task<User> Save(User user)
+        {
+            var entity = MySqlUserMapper.ToEntity(user);
+            _context.Users.Add(entity);
+            await _context.SaveChangesAsync();
+            return MySqlUserMapper.ToDomain(entity);
+        }
     }
 }

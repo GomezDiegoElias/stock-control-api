@@ -14,3 +14,13 @@ GET {{url}}/api/v1/users/2
 Accept: application/json
 
 ###
+
+POST {{url}}/api/v1/users
+Content-Type: application/json
+
+{
+    "firstname": "Valentina",
+    "country": "Argentina"
+}
+
+###
