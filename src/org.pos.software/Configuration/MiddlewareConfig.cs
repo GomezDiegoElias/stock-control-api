@@ -20,7 +20,7 @@ public static class MiddlewareConfig
         // Common middleware
         app.UseRateLimiter();
         app.UseHttpsRedirection();
-        app.UseCors("AllowAll");
+        app.UseCors();
         app.UseAuthentication(); // jwt
         app.UseAuthorization();
         app.MapControllers().RequireRateLimiting("fijo");

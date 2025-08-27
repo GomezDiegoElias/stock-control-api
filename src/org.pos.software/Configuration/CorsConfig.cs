@@ -5,26 +5,18 @@
 
         public static void ConfigureServices(IServiceCollection services, IConfiguration configuration)
         {
-            var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+            var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()!;
 
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowAll", policy =>
+                options.AddDefaultPolicy(optionsCORS =>
                 {
-                    if (allowedOrigins != null && allowedOrigins.Length > 0)
-                    {
-                        policy.WithOrigins(allowedOrigins)
-                              .AllowAnyHeader()
-                              .AllowAnyMethod();
-                    }
-                    else
-                    {
-                        policy.AllowAnyOrigin()
-                              .AllowAnyHeader()
-                              .AllowAnyMethod();
-                    }
+                    optionsCORS
+                        .WithOrigins(allowedOrigins)
+                        .AllowAnyMethod().AllowAnyHeader();
                 });
             });
+
         }
     }
 }
