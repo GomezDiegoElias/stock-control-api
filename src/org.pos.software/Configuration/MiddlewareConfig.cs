@@ -19,6 +19,8 @@ public static class MiddlewareConfig
 
         // Common middleware
         app.UseHttpsRedirection();
+        app.UseCors("AllowAll");
+        app.UseAuthentication(); // jwt
         app.UseAuthorization();
         app.MapControllers();
     }

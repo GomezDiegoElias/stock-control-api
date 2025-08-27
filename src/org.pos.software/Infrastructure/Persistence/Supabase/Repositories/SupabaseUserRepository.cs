@@ -14,14 +14,16 @@ namespace org.pos.software.Infrastructure.Persistence.Supabase.Repositories
 
         public User FindById(int id)
         {
-            var entity = _context.Users.Find(id) ?? throw new Exception("User not found");
-            return Mappers.SupabaseUserMapper.ToDomain(entity);
+            //var entity = _context.Users.Find(id) ?? throw new Exception("User not found");
+            //return Mappers.SupabaseUserMapper.ToDomain(entity);
+            return null;
         }
 
         public List<User> FindAll()
         {
-            var entities = _context.Users.ToList();
-            return entities.Select(Mappers.SupabaseUserMapper.ToDomain).ToList();
+            //var entities = _context.Users.ToList();
+            //return entities.Select(Mappers.SupabaseUserMapper.ToDomain).ToList();
+            return null;
         }
 
     }

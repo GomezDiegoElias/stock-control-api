@@ -3,6 +3,7 @@ using org.pos.software.Application.Services;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
 using org.pos.software.Infrastructure.Persistence.Supabase.Repositories;
 using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
+using org.pos.software.Application.InPort;
 
 namespace org.pos.software.Configuration;
 
@@ -48,6 +49,7 @@ public static class DependencyInjection
     private static void ConfigureApplicationServices(IServiceCollection services)
     {
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuthService, AuthService>();
         // Registrar otros servicios de aplicación aquí
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace org.pos.software.Infrastructure.Rest.Dto.Response
+﻿namespace org.pos.software.Infrastructure.Rest.Dto.Response.General
 {
     public record StandardResponse<T>(
             bool Success,
