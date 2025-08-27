@@ -6,6 +6,7 @@ using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
 using org.pos.software.Application.InPort;
 using FluentValidation;
 using org.pos.software.Utils.Validations;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace org.pos.software.Configuration;
 
@@ -51,12 +52,26 @@ public static class DependencyInjection
 
     private static void ConfigureApplicationServices(IServiceCollection services)
     {
+        // Limitar peticiones
+        services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.AddFixedWindowLimiter("fijo", opt =>
+            {
+                opt.PermitLimit = 2;
+                opt.Window = TimeSpan.FromSeconds(5);
+            });
+        });
+
         // validadores
         services.AddValidatorsFromAssemblyContaining<LoginValidation>();
         services.AddValidatorsFromAssemblyContaining<RegisterValidation>();
+
         // Casos de uso y servicios
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
+
         // Registrar otros servicios de aplicación aquí
+    
     }
 }

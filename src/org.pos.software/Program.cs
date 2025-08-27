@@ -31,6 +31,6 @@ app.MapGet("/", () =>
         status = true
     });
 
-});
+}).RequireRateLimiting("fijo");
 
 app.Run();

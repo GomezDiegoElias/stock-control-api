@@ -18,10 +18,11 @@ public static class MiddlewareConfig
         SwaggerConfig.ConfigureUI(app);
 
         // Common middleware
+        app.UseRateLimiter();
         app.UseHttpsRedirection();
         app.UseCors("AllowAll");
         app.UseAuthentication(); // jwt
         app.UseAuthorization();
-        app.MapControllers();
+        app.MapControllers().RequireRateLimiting("fijo");
     }
 }
