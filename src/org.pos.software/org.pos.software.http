@@ -10,7 +10,44 @@ Accept: application/json
 
 ###
 
-GET {{url}}/api/v1/users/2
+GET {{url}}/api/v1/users/usr-20250827171449-b80a9a42
 Accept: application/json
+
+###
+
+GET {{url}}/api/v1/users/46924236
+Accept: application/json
+
+###
+
+POST {{url}}/api/v1/users
+Content-Type: application/json
+
+{
+    "firstname": "Valentina",
+    "country": "Argentina"
+}
+
+###
+
+POST {{url}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+    "dni": 22354895,
+    "email": "micorreotest@gmail.com",
+    "password": "123456",
+    "firstname": "Test"
+}
+
+###
+
+POST {{url}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "email": "1gmail.com",
+    "password": "1"
+}
 
 ###

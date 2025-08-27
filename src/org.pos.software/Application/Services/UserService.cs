@@ -41,9 +41,19 @@ namespace org.pos.software.Application.Services
             return await _userRepository.FindAll();
         }
 
-        public async Task<User> FindById(int id)
+        public async Task<User?> FindById(int id)
         {
             return await _userRepository.FindById(id);
+        }
+
+        public Task<User> CreateUser(User user)
+        {
+            return _userRepository.Save(user);
+        }
+
+        public Task<User?> FindByDni(long dni)
+        {
+            return _userRepository.FindByDni(dni);
         }
 
     }
