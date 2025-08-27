@@ -4,6 +4,8 @@ using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
 using org.pos.software.Infrastructure.Persistence.Supabase.Repositories;
 using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
 using org.pos.software.Application.InPort;
+using FluentValidation;
+using org.pos.software.Utils.Validations;
 
 namespace org.pos.software.Configuration;
 
@@ -15,6 +17,7 @@ public static class DependencyInjection
         ConfigureApplicationServices(services);
     }
 
+    // repositorios y contexto de base de datos
     private static void ConfigureDatabase(IServiceCollection services, IConfiguration configuration)
     {
         var dbProvider = configuration.GetValue<string>("Database:Provider")?.Trim();
@@ -48,6 +51,10 @@ public static class DependencyInjection
 
     private static void ConfigureApplicationServices(IServiceCollection services)
     {
+        // validadores
+        services.AddValidatorsFromAssemblyContaining<LoginValidation>();
+        services.AddValidatorsFromAssemblyContaining<RegisterValidation>();
+        // Casos de uso y servicios
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         // Registrar otros servicios de aplicación aquí

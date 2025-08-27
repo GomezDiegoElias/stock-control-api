@@ -21,7 +21,7 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Mappers
             //        entity.Status
             //    );
             // Usu del patron de diseno Builder
-            return new User.Builder()
+            return User.Builder()
                 .Id(entity.Id)
                 .Dni(entity.Dni)
                 .Email(entity.Email)

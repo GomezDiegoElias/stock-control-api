@@ -34,10 +34,10 @@ POST {{url}}/api/v1/auth/register
 Content-Type: application/json
 
 {
-    "dni": 87654321,
-    "email": "taysonm895@gmail.com",
-    "password": "apijoselo",
-    "firstname": "Gomez"
+    "dni": 22354895,
+    "email": "micorreotest@gmail.com",
+    "password": "123456",
+    "firstname": "Test"
 }
 
 ###
@@ -46,8 +46,8 @@ POST {{url}}/api/v1/auth/login
 Content-Type: application/json
 
 {
-    "email": "taysonm895@gmail.com",
-    "password": "apijoselo"
+    "email": "1gmail.com",
+    "password": "1"
 }
 
 ###

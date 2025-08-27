@@ -72,12 +72,13 @@ namespace org.pos.software.Application.Services
             if (await _userRepository.FindByEmail(request.Email) != null) 
                 throw new ApplicationException("Email already exists");
 
-            // Validacion por DNI
+            if (await _userRepository.FindByDni(request.Dni) != null) 
+                throw new ApplicationException("DNI already exists");
 
             string salt = PasswordUtils.GenerateRandomSalt();
             string hashedPassword = PasswordUtils.HashPasswordWithSalt(request.Password, salt);
 
-            var newUser = new User.Builder()
+            var newUser = User.Builder()
                 .Dni(request.Dni)
                 .Email(request.Email)
                 .FirstName(request.FirstName)
