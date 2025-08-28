@@ -1,12 +1,13 @@
-﻿using org.pos.software.Application.Ports;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.RateLimiting;
+using org.pos.software.Application.InPort;
+using org.pos.software.Application.Ports;
 using org.pos.software.Application.Services;
+using org.pos.software.Domain.OutPort;
+using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
 using org.pos.software.Infrastructure.Persistence.Supabase.Repositories;
-using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
-using org.pos.software.Application.InPort;
-using FluentValidation;
 using org.pos.software.Utils.Validations;
-using Microsoft.AspNetCore.RateLimiting;
 
 namespace org.pos.software.Configuration;
 
@@ -43,7 +44,8 @@ public static class DependencyInjection
                 break;
             case "mysql":
                 DatabaseConfig.ConfigureMySql(services, connectionString);
-                services.AddScoped<MySqlUserRepository>();
+                services.AddScoped<IUserRepository, MySqlUserRepository>();
+                services.AddScoped<IRoleRepository, MySqlRoleRepository>();
                 break;
             default:
                 throw new InvalidOperationException($"Proveedor de base de datos no soportado: {dbProvider}");
@@ -68,8 +70,19 @@ public static class DependencyInjection
         services.AddValidatorsFromAssemblyContaining<RegisterValidation>();
 
         // Casos de uso y servicios
+        services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
+
+        // politicas / restricciones
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("CanCreate", policy => policy.RequireClaim("permission", "CREATE"));
+            options.AddPolicy("CanRead", policy => policy.RequireClaim("permission", "READ"));
+            options.AddPolicy("CanUpdate", policy => policy.RequireClaim("permission", "UPDATE"));
+            options.AddPolicy("CanDelete", policy => policy.RequireClaim("permission", "DELETE"));
+            // + politicas
+        });
 
         // Registrar otros servicios de aplicación aquí
     

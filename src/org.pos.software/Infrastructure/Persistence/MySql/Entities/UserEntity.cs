@@ -9,7 +9,6 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Entities
     {
 
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column("id")]
         public string Id { get; set; }
 
@@ -36,10 +35,12 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Entities
         public string FirstName { get; set; }
 
         [Required]
-        public Role Role { get; set; } = Role.PRESUPUESTISTA;
-        
-        [Required]
         public Status Status { get; set; } = Status.ACTIVE;
+
+        [ForeignKey("Role")]
+        [Column("role_id")]
+        public int RoleId { get; set; }
+        public RoleEntity Role { get; set; }
 
         [Required]
         public DateTime CreatedAt { get; set; } = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") != null ? DateTime.Now : DateTime.Now;
@@ -49,7 +50,7 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Entities
 
         public UserEntity() { }
 
-        public UserEntity(string id, long dni, string email, string hash, string salt, string firstName, Role role, Status status)
+        public UserEntity(string id, long dni, string email, string hash, string salt, string firstName, Status status, int roleId)
         {
             Id = id;
             Dni = dni;
@@ -57,8 +58,8 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Entities
             Hash = hash;
             Salt = salt;
             FirstName = firstName;
-            Role = role;
             Status = status;
+            RoleId = roleId;
         }
 
     }

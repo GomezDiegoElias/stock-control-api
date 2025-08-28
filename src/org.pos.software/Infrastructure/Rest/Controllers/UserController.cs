@@ -2,8 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using org.pos.software.Application.Ports;
 using org.pos.software.Domain.Entities;
+//using org.pos.software.Infrastructure.Persistence.MySql.Entities;
 using org.pos.software.Infrastructure.Persistence.MySql.Mappers;
-
 //using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
 // using org.pos.software.Infrastructure.Persistence.Supabase.Mappers;
 using org.pos.software.Infrastructure.Rest.Dto.Request;
@@ -27,6 +27,12 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
         }
 
         // falta paginacion, filtros, etc
+
+        // -------------------------
+        // GET: /api/v1/users
+        // Acceso solo para ADMIN
+        // -------------------------
+        [Authorize(Roles = "ADMIN")]
         [HttpGet]
         public async Task<ActionResult<StandardResponse<List<UserApiResponse>>>> GetAllUsers()
         {
@@ -42,69 +48,41 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
         }
 
-        //[HttpGet("{id:int}")]
-        //public async Task<ActionResult<StandardResponse<UserApiResponse>>> GetUserById(int id)
-        //{
 
-        //    try
-        //    {
-        //        User user = await userService.FindById(id);
-        //        UserApiResponse response = MySqlUserMapper.ToResponse(user);
-        //        return Ok(new StandardResponse<UserApiResponse>(
-        //            Success: true,
-        //            Message: "User retrieved successfully",
-        //            Data: response
-        //        ));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return NotFound(new StandardResponse<UserApiResponse>(
-        //            Success: false,
-        //            Message: "User not found",
-        //            Data: null,
-        //            Error: new ErrorDetails(
-        //                    Message: "User with the specified ID does not exist.",
-        //                    Details: $"Something went wrong. {ex.Message}",
-        //                    Path: HttpContext.Request.Path
-        //                ),
-        //            Status: 404
-        //        ));
-        //    }
-
-        //}
-
-        //[HttpPost]
-        //public async Task<ActionResult<StandardResponse<UserApiResponse>>> CreateUser([FromBody] UserApiRequest request)
-        //{
-
-        //    User user = new User
-        //    {
-        //        FirstName = request.Firstname,
-        //        Country = request.Country
-        //    };
-        //    User createdUser = await userService.CreateUser(user);
-        //    UserApiResponse response = UserMapper.ToResponse(createdUser);
-        //    return CreatedAtAction(
-        //        nameof(GetUserById),
-        //        new { id = createdUser.Id },
-        //        new StandardResponse<UserApiResponse>(
-        //            Success: true,
-        //            Message: "User created successfully",
-        //            Data: response,
-        //            Status: 201
-        //        )
-        //    );
-        //    return null;
-
-        //}
-
+        // -------------------------
+        // GET: /api/v1/users/{dni}
+        // Acceso para cualquier rol con permiso READ
+        // -------------------------
+        [Authorize(Policy = "CanRead")]
         [HttpGet("{dni:long}")]
         public async Task<ActionResult<StandardResponse<UserApiResponse>>> GetUserByDni(long dni)
         {
             try
             {
 
-                User user = await userService.FindByDni(dni);
+                User? user = await userService.FindByDni(dni);
+
+                if (user == null)
+                {
+                    return NotFound(new StandardResponse<UserApiResponse>(
+                    Success: false,
+                    Message: "User not found",
+                    Data: null,
+                    Error: new ErrorDetails(
+                            Message: "Something went wrong.",
+                            Details: "User with the specified DNI does not exist.",
+                            Path: HttpContext.Request.Path
+                        ),
+                    Status: 404
+                ));
+                }
+
+                // validacion en Domain
+                if (!user.Can("READ"))
+                {
+                    return Forbid();
+                }
+
                 UserApiResponse response = MySqlUserMapper.ToResponse(user);
                 return Ok(new StandardResponse<UserApiResponse>(
                     Success: true,
@@ -115,16 +93,16 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             }
             catch (Exception ex)
             {
-                return NotFound(new StandardResponse<UserApiResponse>(
+                return StatusCode(500, new StandardResponse<UserApiResponse>(
                     Success: false,
-                    Message: "User not found",
+                    Message: "Internal server error",
                     Data: null,
                     Error: new ErrorDetails(
-                            Message: "User with the specified DNI does not exist.",
-                            Details: $"Something went wrong. {ex.Message}",
-                            Path: HttpContext.Request.Path
-                        ),
-                    Status: 404
+                        Message: "An unexpected error occurred.",
+                        Details: ex.Message,
+                        Path: HttpContext.Request.Path
+                    ),
+                    Status: 500
                 ));
             }
         
