@@ -1,8 +1,12 @@
-﻿namespace org.pos.software.Configuration;
+﻿using System.Threading.Tasks;
+using org.pos.software.Infrastructure.Persistence.MySql;
+using org.pos.software.Utils.Seeder;
+
+namespace org.pos.software.Configuration;
 
 public static class MiddlewareConfig
 {
-    public static void Configure(WebApplication app, IConfiguration configuration)
+    public static async Task Configure(WebApplication app, IConfiguration configuration)
     {
         // Database initialization
         DatabaseConfig.EnsureDatabaseCreated(app, configuration);
@@ -18,8 +22,17 @@ public static class MiddlewareConfig
         SwaggerConfig.ConfigureUI(app);
 
         // Common middleware
+        app.UseRateLimiter();
         app.UseHttpsRedirection();
+        app.UseCors();
+        app.UseAuthentication(); // jwt
         app.UseAuthorization();
-        app.MapControllers();
+        app.MapControllers().RequireRateLimiting("fijo");
+
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<MySqlDbContext>();
+        await MySqlDbSedder.SeedRolesAndPermissions(db);
+        await MySqlDbSedder.SeedUserWhitDiferentRoles(db);
+
     }
 }

@@ -19,15 +19,17 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
 
         public async Task<List<User>> FindAll()
         {
-            List<UserEntity> entities = await _dbContext.Users.ToListAsync();
-            List<User> users = entities.Select(UserMapper.ToDomain).ToList();
-            return users;
+            //List<UserEntity> entities = await _dbContext.Users.ToListAsync();
+            //List<User> users = entities.Select(UserMapper.ToDomain).ToList();
+            //return users;
+            return null;
         }
 
         public async Task<User> FindById(int id)
         {
-            var entity = await _dbContext.Users.FindAsync(id) ?? throw new KeyNotFoundException($"User with ID {id} not found.");
-            return UserMapper.ToDomain(entity);
+            //var entity = await _dbContext.Users.FindAsync(id) ?? throw new KeyNotFoundException($"User with ID {id} not found.");
+            //return UserMapper.ToDomain(entity);
+            return null;
         }
 
     }

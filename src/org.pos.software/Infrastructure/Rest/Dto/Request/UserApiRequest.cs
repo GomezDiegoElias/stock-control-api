@@ -2,5 +2,7 @@
 {
     public class UserApiRequest
     {
+        public string Firstname { get; set; }
+        public string Country { get; set; }
     }
 }

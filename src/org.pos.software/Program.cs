@@ -1,3 +1,6 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using org.pos.software.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +11,8 @@ builder.Services.AddControllers();
 // Configuraciones modulares de servicios
 SwaggerConfig.ConfigureServices(builder.Services);
 DependencyInjection.ConfigureServices(builder.Services, builder.Configuration);
+JwtConfig.ConfigureServices(builder.Services, builder.Configuration);
+CorsConfig.ConfigureServices(builder.Services, builder.Configuration);
 
 var app = builder.Build();
 
@@ -26,6 +31,6 @@ app.MapGet("/", () =>
         status = true
     });
 
-});
+}).RequireRateLimiting("fijo");
 
 app.Run();

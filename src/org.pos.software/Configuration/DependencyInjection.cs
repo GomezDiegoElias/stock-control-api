@@ -1,8 +1,13 @@
-﻿using org.pos.software.Application.Ports;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.RateLimiting;
+using org.pos.software.Application.InPort;
+using org.pos.software.Application.Ports;
 using org.pos.software.Application.Services;
+using org.pos.software.Domain.OutPort;
+using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
 using org.pos.software.Infrastructure.Persistence.Supabase.Repositories;
-using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
+using org.pos.software.Utils.Validations;
 
 namespace org.pos.software.Configuration;
 
@@ -14,6 +19,7 @@ public static class DependencyInjection
         ConfigureApplicationServices(services);
     }
 
+    // repositorios y contexto de base de datos
     private static void ConfigureDatabase(IServiceCollection services, IConfiguration configuration)
     {
         var dbProvider = configuration.GetValue<string>("Database:Provider")?.Trim();
@@ -38,7 +44,8 @@ public static class DependencyInjection
                 break;
             case "mysql":
                 DatabaseConfig.ConfigureMySql(services, connectionString);
-                services.AddScoped<MySqlUserRepository>();
+                services.AddScoped<IUserRepository, MySqlUserRepository>();
+                services.AddScoped<IRoleRepository, MySqlRoleRepository>();
                 break;
             default:
                 throw new InvalidOperationException($"Proveedor de base de datos no soportado: {dbProvider}");
@@ -47,7 +54,37 @@ public static class DependencyInjection
 
     private static void ConfigureApplicationServices(IServiceCollection services)
     {
+        // Limitar peticiones
+        services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+            options.AddFixedWindowLimiter("fijo", opt =>
+            {
+                opt.PermitLimit = 2;
+                opt.Window = TimeSpan.FromSeconds(5);
+            });
+        });
+
+        // validadores
+        services.AddValidatorsFromAssemblyContaining<LoginValidation>();
+        services.AddValidatorsFromAssemblyContaining<RegisterValidation>();
+
+        // Casos de uso y servicios
+        services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IAuthService, AuthService>();
+
+        // politicas / restricciones
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("CanCreate", policy => policy.RequireClaim("permission", "CREATE"));
+            options.AddPolicy("CanRead", policy => policy.RequireClaim("permission", "READ"));
+            options.AddPolicy("CanUpdate", policy => policy.RequireClaim("permission", "UPDATE"));
+            options.AddPolicy("CanDelete", policy => policy.RequireClaim("permission", "DELETE"));
+            // + politicas
+        });
+
         // Registrar otros servicios de aplicación aquí
+    
     }
 }
