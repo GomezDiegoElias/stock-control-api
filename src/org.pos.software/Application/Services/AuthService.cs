@@ -1,4 +1,5 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using org.pos.software.Application.InPort;
@@ -6,28 +7,42 @@ using org.pos.software.Configuration;
 using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
+using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
 using org.pos.software.Infrastructure.Rest.Dto.Request;
 using org.pos.software.Infrastructure.Rest.Dto.Response;
 using org.pos.software.Utils;
-using System.Security.Claims;
 
 namespace org.pos.software.Application.Services
 {
     public class AuthService : IAuthService
     {
 
-        private readonly MySqlUserRepository _userRepository;
+        //private readonly MySqlUserRepository _userRepository;
+        //private readonly MySqlRoleRepository _roleRepository;
+        //private readonly JwtConfigDto _jwtConfig;
+
+        //public AuthService(JwtConfigDto jwtConfig, MySqlUserRepository userRepository, MySqlRoleRepository roleRepository)
+        //{
+        //    _jwtConfig = jwtConfig;
+        //    _userRepository = userRepository;
+        //    _roleRepository = roleRepository;
+        //}
+
+        private readonly IUserRepository _userRepository;
+        private readonly IRoleRepository _roleRepository;
         private readonly JwtConfigDto _jwtConfig;
 
-        public AuthService(MySqlUserRepository userRepository, JwtConfigDto jwtConfig)
+        public AuthService(IUserRepository userRepository, IRoleRepository roleRepository, JwtConfigDto jwtConfig)
         {
             _userRepository = userRepository;
+            _roleRepository = roleRepository;
             _jwtConfig = jwtConfig;
         }
 
         public async Task<AuthResponse> Login(LoginRequest request)
         {
             
+            // Verificaciones
             var user = await _userRepository.FindByEmail(request.Email);
 
             if (user == null) throw new UnauthorizedAccessException("Invalid credentials");
@@ -36,19 +51,29 @@ namespace org.pos.software.Application.Services
 
             if (!passwordValid) throw new UnauthorizedAccessException("Invalid credentials");
 
+
+            // Generacion del token
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtConfig.Secret);
 
+
+            var claims = new List<Claim>
+            {
+                new Claim("id", user.Id),
+                new Claim("email", user.Email),
+                new Claim("role", user.Role.Name)
+            };
+
+            // Agrega permisos como claims individuales
+            foreach (var perm in user.Role.Permissions)
+            {
+                claims.Add(new Claim("permission", perm));
+            }
+
+            // propiedades del token
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim("id", user.Id),
-                    new Claim("dni", user.Dni.ToString()),
-                    new Claim("email", user.Email),
-                    new Claim("role", user.Role.ToString()),
-                    // Agregar mas claims si es necesario
-                }),
+                Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddMinutes(_jwtConfig.ExpirationMinutes),
                 Issuer = _jwtConfig.Issuer,
                 Audience = _jwtConfig.Audience,
@@ -56,12 +81,13 @@ namespace org.pos.software.Application.Services
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
+            var tokenString = tokenHandler.WriteToken(token); // token generado
 
+            // respuesta del enpoint
             return new AuthResponse(
                 Message: "Login successful",
-                AccessToken: tokenString,
-                RefreshToken: "" // Implementar refresh token si es necesario
+                AccessToken: tokenString, // muestra el token generado
+                RefreshToken: "Proximamente" // Implementar refresh token si es necesario
             );
 
         }
@@ -69,6 +95,7 @@ namespace org.pos.software.Application.Services
         public async Task<AuthResponse> Register(RegisterRequest request)
         {
 
+            // varificaciones por email y dni
             if (await _userRepository.FindByEmail(request.Email) != null) 
                 throw new ApplicationException("Email already exists");
 
@@ -77,6 +104,13 @@ namespace org.pos.software.Application.Services
 
             string salt = PasswordUtils.GenerateRandomSalt();
             string hashedPassword = PasswordUtils.HashPasswordWithSalt(request.Password, salt);
+
+            // Creacion de un nuevo usuario usando el patron builder
+
+            // Busca si existe el rol
+            var roleEntity = await _roleRepository.FindByName("PRESUPUESTISTA");
+            if (roleEntity == null)
+                throw new ApplicationException("Role PRESUPUESTISTA does not exist");
 
             var newUser = User.Builder()
                 .Dni(request.Dni)
@@ -88,10 +122,15 @@ namespace org.pos.software.Application.Services
                 .Salt(salt)
                 .Build();
 
-            newUser.generateId();
+            // Genera el id personalizado si no lo tiene
+            if (string.IsNullOrEmpty(newUser.Id)) newUser.Id = User.GenerateId();
 
+            // Persiste en base de datos
             var createdUser = await _userRepository.Save(newUser);
 
+            // ???? Logearse al momento de REGISTRAR ????
+
+            // respuesta del endpoint
             AuthResponse response = new AuthResponse(
                 Message: "User created successfully",
                 AccessToken: "",

@@ -10,17 +10,6 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Mappers
 
         public static User ToDomain(UserEntity entity)
         {
-            //return new User(
-            //        entity.Id,
-            //        entity.Dni,
-            //        entity.Email,
-            //        entity.Hash,
-            //        entity.Salt,
-            //        entity.FirstName,
-            //        entity.Role,
-            //        entity.Status
-            //    );
-            // Usu del patron de diseno Builder
             return User.Builder()
                 .Id(entity.Id)
                 .Dni(entity.Dni)
@@ -28,23 +17,26 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Mappers
                 .Hash(entity.Hash)
                 .Salt(entity.Salt)
                 .FirstName(entity.FirstName)
-                .Role(entity.Role)
                 .Status(entity.Status)
+                .Role(new Role(entity.Role.Name, entity.Role.RolePermissions.Select(rp => rp.Permission.Name))) // asigna rol con permisos
                 .Build();
         }
 
-        public static UserEntity ToEntity(User domain)
+        public static UserEntity ToEntity(User domain, RoleEntity roleEntity)
         {
             return new UserEntity(
-                    domain.Id,
-                    domain.Dni,
-                    domain.Email,
-                    domain.Hash,
-                    domain.Salt,
-                    domain.FirstName,
-                    domain.Role,
-                    domain.Status
-                );
+                domain.Id,
+                domain.Dni,
+                domain.Email,
+                domain.Hash,
+                domain.Salt,
+                domain.FirstName,
+                domain.Status,
+                roleEntity.Id
+            )
+            {
+                Role = roleEntity
+            };
         }
 
         public static UserApiResponse ToResponse(User domain)
@@ -54,10 +46,22 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Mappers
                     domain.Dni,
                     domain.Email,
                     domain.FirstName,
-                    domain.Role.ToString(),
+                    domain.Role.Name ?? string.Empty,
                     domain.Status.ToString()
                 );
         }
+
+        //public static UserApiResponse ToResponse(UserEntity entity)
+        //{
+        //    return new UserApiResponse(
+        //            entity.Id,
+        //            entity.Dni,
+        //            entity.Email,
+        //            entity.FirstName,
+        //            entity.Role.Name ?? string.Empty,
+        //            entity.Status.ToString()
+        //        );
+        //}
 
     }
 }

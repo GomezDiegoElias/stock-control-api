@@ -40,17 +40,18 @@ namespace org.pos.software.Utils.Patterns
             return This;
         }
 
+        public UserBuilder Status(Status status)
+        {
+            _entity.Status = status;
+            return This;
+        }
+
         public UserBuilder Role(Role role)
         {
             _entity.Role = role;
             return This;
         }
 
-        public UserBuilder Status(Status status)
-        {
-            _entity.Status = status;
-            return This;
-        }
     }
 
 }
