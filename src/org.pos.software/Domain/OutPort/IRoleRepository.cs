@@ -7,6 +7,5 @@ namespace org.pos.software.Domain.OutPort
     {
         public Task<Role> FindByName(string name);
         public Task<Role> Save(Role role);
-        public Task<List<RoleEntity>> FindAll();
     }
 }
