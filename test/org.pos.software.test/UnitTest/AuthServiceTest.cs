@@ -178,10 +178,7 @@ namespace org.pos.software.test.UnitTest
                 .ReturnsAsync((User?)null);
 
             mockRoleRepo.Setup(r => r.FindByName(role.Name))
-                .ReturnsAsync(new RoleEntity
-                {
-                    Name = role.Name,
-                });
+                .ReturnsAsync(role);
 
             var jwtConfig = new JwtConfigDto { Secret = "key", ExpirationMinutes = 60, Issuer = "test", Audience = "test" };
             var service = new AuthService(mockUserRepo.Object, mockRoleRepo.Object, jwtConfig);
