@@ -14,5 +14,16 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Mappers
             );
         }
 
+        public static RoleEntity toEntity(Role domain)
+        {
+            return new RoleEntity
+            {
+                Name = domain.Name,
+                RolePermissions = domain.Permissions
+                    .Select(p => new RolePermissionEntity { Permission = new PermissionEntity { Name = p } })
+                    .ToList()
+            };
+        }
+
     }
 }
