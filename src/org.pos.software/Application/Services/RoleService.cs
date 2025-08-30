@@ -24,13 +24,9 @@ namespace org.pos.software.Application.Services
 
         public async Task<Role> CreateRole(Role role)
         {
-            var entity = new RoleEntity
-            {
-                Name = role.Name
-            };
-            var saved = await _roleRepository.Save(entity);
-            return new Role(saved.Name, saved.RolePermissions.Select(rp => rp.Permission.Name));
+            return await _roleRepository.Save(role);
         }
+
     }
 
 }
