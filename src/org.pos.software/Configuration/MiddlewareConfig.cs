@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using org.pos.software.Infrastructure.Persistence.MySql;
+using org.pos.software.Infrastructure.Persistence.SqlServer;
 using org.pos.software.Utils.Seeder;
 
 namespace org.pos.software.Configuration;
@@ -30,9 +31,14 @@ public static class MiddlewareConfig
         app.MapControllers().RequireRateLimiting("fijo");
 
         using var scope = app.Services.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<MySqlDbContext>();
-        await MySqlDbSedder.SeedRolesAndPermissions(db);
-        await MySqlDbSedder.SeedUserWhitDiferentRoles(db);
+
+        //var db = scope.ServiceProvider.GetRequiredService<MySqlDbContext>();
+        //await MySqlDbSedder.SeedRolesAndPermissions(db);
+        //await MySqlDbSedder.SeedUserWhitDiferentRoles(db);
+
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await DbSedder.SeedRolesAndPermissions(db);
+        await DbSedder.SeedUserWhitDiferentRoles(db);
 
     }
 }
