@@ -25,11 +25,12 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Repositories
             return MysSqlRoleMapper.ToDomain(entity);
         }
 
-        public async Task<RoleEntity> Save(RoleEntity role)
+        public async Task<Role> Save(Role role)
         {
-            _context.Roles.Add(role);
+            var entity = MysSqlRoleMapper.toEntity(role);
+            _context.Roles.Add(entity);
             await _context.SaveChangesAsync();
-            return role;
+            return MysSqlRoleMapper.ToDomain(entity);
         }
 
         public async Task<List<RoleEntity>> FindAll()
