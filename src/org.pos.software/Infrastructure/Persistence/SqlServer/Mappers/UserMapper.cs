@@ -17,7 +17,8 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Mappers
                 .Salt(entity.Salt)
                 .FirstName(entity.FirstName)
                 .Status(entity.Status)
-                .Role(new Role(entity.Role.Name, entity.Role.RolePermissions.Select(rp => rp.Permission.Name))) // asigna rol con permisos
+                //.Role(new Role(entity.Role.Name, entity.Role.RolePermissions.Select(rp => rp.Permission.Name) ?? Enumerable.Empty<string>())) // asigna rol con permisos
+                .Role(new Role(entity.Role.Name, entity.Role.RolePermissions.Select(rp => rp.Permission.Name)))
                 .Build();
         }
 
