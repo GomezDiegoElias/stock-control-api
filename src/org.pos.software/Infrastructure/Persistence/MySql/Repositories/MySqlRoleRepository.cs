@@ -1,6 +1,8 @@
 ﻿using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Persistence.MySql.Entities;
 using Microsoft.EntityFrameworkCore;
+using org.pos.software.Domain.Entities;
+using org.pos.software.Infrastructure.Persistence.MySql.Mappers;
 
 namespace org.pos.software.Infrastructure.Persistence.MySql.Repositories
 {
@@ -14,12 +16,13 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Repositories
             _context = context;
         }
 
-        public async Task<RoleEntity> FindByName(string name)
+        public async Task<Role> FindByName(string name)
         {
-            return await _context.Roles
+            var entity = await _context.Roles
                             .Include(r => r.RolePermissions)
                             .ThenInclude(rp => rp.Permission)
                             .FirstOrDefaultAsync(r => r.Name == name);
+            return MysSqlRoleMapper.ToDomain(entity);
         }
 
         public async Task<RoleEntity> Save(RoleEntity role)
