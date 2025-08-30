@@ -8,6 +8,7 @@ using org.pos.software.Application.Services;
 using org.pos.software.Configuration;
 using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.OutPort;
+using org.pos.software.Infrastructure.Persistence.MySql.Entities;
 using org.pos.software.Infrastructure.Rest.Dto.Request;
 using org.pos.software.Utils;
 
@@ -144,6 +145,54 @@ namespace org.pos.software.test.UnitTest
             // Arrange
             // Act
             // Assert
+        }
+
+        [Fact]
+        public async Task Register_CreatedNewUser_ReturnsOk()
+        {
+
+            // Arrange
+            var mockUserRepo = new Mock<IUserRepository>();
+            var mockRoleRepo = new Mock<IRoleRepository>();
+
+            var role = new Role("PRESUPUESTISTA", new[] { "CREATE", "READ" });
+
+            //var registerRequest = new RegisterRequest(
+            //        46924236,
+            //        "gomezdiegoelias1@gmail.com",
+            //        "123456",
+            //        "Diego"
+            //    );
+
+            var registerRequest = new RegisterRequest(
+                Dni: 12345678,
+                Email: "gomezdiegoelias1@gmail.com",
+                Password: "123456",
+                FirstName: "Diego"
+            );
+
+            mockUserRepo.Setup(r => r.FindByEmail(registerRequest.Email))
+                .ReturnsAsync((User?)null);
+
+            mockUserRepo.Setup(r => r.FindByDni(registerRequest.Dni))
+                .ReturnsAsync((User?)null);
+
+            mockRoleRepo.Setup(r => r.FindByName(role.Name))
+                .ReturnsAsync(new RoleEntity
+                {
+                    Name = role.Name,
+                });
+
+            var jwtConfig = new JwtConfigDto { Secret = "key", ExpirationMinutes = 60, Issuer = "test", Audience = "test" };
+            var service = new AuthService(mockUserRepo.Object, mockRoleRepo.Object, jwtConfig);
+
+            // Act
+            var response = await service.Register(registerRequest);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal("User created successfully", response.Message);
+
         }
 
     }
