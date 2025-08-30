@@ -33,13 +33,5 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Repositories
             return MysSqlRoleMapper.ToDomain(entity);
         }
 
-        public async Task<List<RoleEntity>> FindAll()
-        {
-            return await _context.Roles
-                            .Include(r => r.RolePermissions)
-                            .ThenInclude(rp => rp.Permission)
-                            .ToListAsync();
-        }
-
     }
 }
