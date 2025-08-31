@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using org.pos.software.Application.InPort;
 using org.pos.software.Infrastructure.Rest.Dto.Request;
 using org.pos.software.Infrastructure.Rest.Dto.Response;
+using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 
 namespace org.pos.software.Infrastructure.Rest.Controllers
 {
@@ -30,7 +31,7 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest request)
+        public async Task<ActionResult<StandardResponse<AuthResponse>>> Register([FromBody] RegisterRequest request)
         {
 
             // Validacion del request
@@ -38,25 +39,22 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
             if (!validationResult.IsValid)
             {
-                return BadRequest(new
-                {
-                    Message = "Validation failed",
-                    Errors = validationResult.Errors.Select(e => new
-                    {
-                        Property = e.PropertyName,
-                        Error = e.ErrorMessage
-                    })
-                });
+                var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+                var errors = new ErrorDetails(400, "Validation failed", HttpContext.Request.Path, validationErrors);
+                return new StandardResponse<AuthResponse>(false, "Something went wrong", null, errors, 400);
             }
 
-            var response = await _authService.Register(request);
+            var registerResponse = await _authService.Register(request);
+
+            var response = new StandardResponse<AuthResponse>(true, "Register successfully", registerResponse);
+
             return Ok(response);
 
         }
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult<StandardResponse<AuthResponse>>> Login([FromBody] LoginRequest request)
         {
 
             // Validacion del request
@@ -64,21 +62,19 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
             if (!validationResult.IsValid)
             {
-                return BadRequest(new
-                {
-                    Message = "Validation failed",
-                    Errors = validationResult.Errors.Select(e => new
-                    {
-                        Property = e.PropertyName,
-                        Error = e.ErrorMessage
-                    })
-                });
+                var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+                var errors = new ErrorDetails(400, "Validation failed", HttpContext.Request.Path, validationErrors);
+                return new StandardResponse<AuthResponse>(false, "Something went wrong", null, errors, 400);
             }
 
-            var response = await _authService.Login(request);
+            var loginResponse = await _authService.Login(request);
+
+            var response = new StandardResponse<AuthResponse>(true, "Login successfully", loginResponse);
+
             return Ok(response);
 
         }
+
 
     }
 }

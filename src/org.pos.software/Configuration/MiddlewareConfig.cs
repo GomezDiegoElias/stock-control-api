@@ -37,7 +37,9 @@ public static class MiddlewareConfig
 
                     context.Response.StatusCode = statusCode;
 
-                    var response = new ErrorDetails(statusCode, ex.Message, context.Request.Path, null);
+                    var error = new ErrorDetails(statusCode, ex.Message, context.Request.Path, null); // ex.StackTrace
+
+                    var response = new StandardResponse<string>(false, "Something went wrong", null, error, statusCode);
 
                     await context.Response.WriteAsJsonAsync(response);
 
