@@ -1,6 +1,9 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Diagnostics;
+using org.pos.software.Domain.Exceptions;
 using org.pos.software.Infrastructure.Persistence.MySql;
 using org.pos.software.Infrastructure.Persistence.SqlServer;
+using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 using org.pos.software.Utils.Seeder;
 
 namespace org.pos.software.Configuration;
@@ -9,15 +12,65 @@ public static class MiddlewareConfig
 {
     public static async Task Configure(WebApplication app, IConfiguration configuration)
     {
+
+        // Manejo global de excepciones
+        app.UseExceptionHandler(appError =>
+        {
+            appError.Run(async context =>
+            {
+                context.Response.ContentType = "application/json";
+
+                var contextFeature = context.Features.Get<IExceptionHandlerFeature>();
+                if (contextFeature != null)
+                {
+                    var ex = contextFeature.Error;
+                    int statusCode = ex switch
+                    {
+                        // Excepciones comunes
+                        KeyNotFoundException => 404,
+                        UnauthorizedAccessException => 401,
+                        ApplicationException => 400,
+                        // Excepciones personalizas
+                        UserNotFoundException => 404,
+                        _ => 500 // Internal Server
+                    };
+
+                    context.Response.StatusCode = statusCode;
+
+                    var response = new ErrorDetails(statusCode, ex.Message, context.Request.Path, null);
+
+                    await context.Response.WriteAsJsonAsync(response);
+
+                }
+            });
+        });
+
+        // Capturar error de mal URL
+        app.Use(async (context, next) =>
+        {
+            await next();
+
+            if (context.Response.StatusCode == StatusCodes.Status404NotFound &&
+                !context.Response.HasStarted)
+            {
+                context.Response.ContentType = "application/json";
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    StatusCode = 404,
+                    Message = $"The endpoint {context.Request.Path} was not found."
+                });
+            }
+        });
+
         // Database initialization
         DatabaseConfig.EnsureDatabaseCreated(app, configuration);
 
         // Development-specific configurations
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-            // SwaggerConfig.ConfigureUI(app);
-        }
+        //if (app.Environment.IsDevelopment())
+        //{
+        //    app.UseDeveloperExceptionPage();
+        //    // SwaggerConfig.ConfigureUI(app);
+        //}
 
         // Swagger en TODOS los entornos (Desarrollo, Pruebas, Producción)
         SwaggerConfig.ConfigureUI(app);
