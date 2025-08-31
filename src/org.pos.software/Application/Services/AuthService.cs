@@ -74,7 +74,7 @@ namespace org.pos.software.Application.Services
 
             // respuesta del enpoint
             return new AuthResponse(
-                Message: "Login successful",
+                //Message: "Login successful",
                 AccessToken: tokenString, // muestra el token generado
                 RefreshToken: "Proximamente" // Implementar refresh token si es necesario
             );
@@ -121,7 +121,7 @@ namespace org.pos.software.Application.Services
 
             // respuesta del endpoint
             AuthResponse response = new AuthResponse(
-                Message: "User created successfully",
+                //Message: "User created successfully",
                 AccessToken: "",
                 RefreshToken: ""
             );
