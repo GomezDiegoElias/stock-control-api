@@ -40,6 +40,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
                     .Dni(Convert.ToInt64(reader["dni"]))
                     .Email(reader["email"].ToString() ?? string.Empty)
                     .FirstName(reader["first_name"].ToString() ?? string.Empty)
+                    .LastName(reader["last_name"].ToString() ?? string.Empty)
                     .Role(new Role(reader["role"].ToString() ?? string.Empty, Enumerable.Empty<string>()))
                     .Status(Enum.Parse<Status>(reader["status"].ToString() ?? string.Empty))
                     .Build()
