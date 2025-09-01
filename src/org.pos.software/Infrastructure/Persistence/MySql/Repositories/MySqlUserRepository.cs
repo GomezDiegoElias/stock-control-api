@@ -3,6 +3,7 @@ using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Persistence.MySql.Entities;
 using org.pos.software.Infrastructure.Persistence.MySql.Mappers;
+using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 
 namespace org.pos.software.Infrastructure.Persistence.MySql.Repositories
 {
@@ -16,19 +17,19 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Repositories
             _context = context;
         }
 
-        public async Task<List<User>> FindAll()
+        public async Task<PaginatedResponse<User>> FindAll(int pageIndex, int pageSize)
         {
             
             //var entities = await _context.Users.ToListAsync();
 
-            var entities = await _context.Users
-                .Include(u => u.Role)                // trae el rol
-                .ThenInclude(r => r.RolePermissions) // trae los permisos
-                .ThenInclude(rp => rp.Permission)    // trae los permisos individuales
-                .ToListAsync();
+            //var entities = await _context.Users
+            //    .Include(u => u.Role)                // trae el rol
+            //    .ThenInclude(r => r.RolePermissions) // trae los permisos
+            //    .ThenInclude(rp => rp.Permission)    // trae los permisos individuales
+            //    .ToListAsync();
 
-            List<User> users = entities.Select(MySqlUserMapper.ToDomain).ToList();
-            return users;
+            //List<User> users = entities.Select(MySqlUserMapper.ToDomain).ToList();
+            return null;
 
         }
 

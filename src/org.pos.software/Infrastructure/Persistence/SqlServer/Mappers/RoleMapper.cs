@@ -1,9 +1,9 @@
 ﻿using org.pos.software.Domain.Entities;
-using org.pos.software.Infrastructure.Persistence.MySql.Entities;
+using org.pos.software.Infrastructure.Persistence.SqlServer.Entities;
 
-namespace org.pos.software.Infrastructure.Persistence.MySql.Mappers
+namespace org.pos.software.Infrastructure.Persistence.SqlServer.Mappers
 {
-    public static class MysSqlRoleMapper
+    public static class RoleMapper
     {
 
         public static Role ToDomain(RoleEntity entity)

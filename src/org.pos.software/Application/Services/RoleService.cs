@@ -2,6 +2,7 @@
 using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Persistence.MySql.Entities;
+using org.pos.software.Infrastructure.Persistence.MySql.Mappers;
 
 namespace org.pos.software.Application.Services
 {
@@ -16,20 +17,16 @@ namespace org.pos.software.Application.Services
 
         public async Task<Role> GetRoleByName(string name)
         {
-            var entity = await _roleRepository.FindByName(name);
-            if (entity == null) return null;
-            return new Role(entity.Name, entity.RolePermissions.Select(rp => rp.Permission.Name));
+            var role = await _roleRepository.FindByName(name);
+            if (role == null) return null;
+            return role;
         }
 
         public async Task<Role> CreateRole(Role role)
         {
-            var entity = new RoleEntity
-            {
-                Name = role.Name
-            };
-            var saved = await _roleRepository.Save(entity);
-            return new Role(saved.Name, saved.RolePermissions.Select(rp => rp.Permission.Name));
+            return await _roleRepository.Save(role);
         }
+
     }
 
 }

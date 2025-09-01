@@ -40,6 +40,12 @@ namespace org.pos.software.Utils.Patterns
             return This;
         }
 
+        public UserBuilder LastName(string lastName)
+        {
+            _entity.LastName = lastName;
+            return This;
+        }
+
         public UserBuilder Status(Status status)
         {
             _entity.Status = status;

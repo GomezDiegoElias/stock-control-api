@@ -34,3 +34,9 @@ app.MapGet("/", () =>
 }).RequireRateLimiting("fijo");
 
 app.Run();
+
+// necesario para los test de integracion
+namespace org.pos.software
+{
+    public partial class Program { }
+}

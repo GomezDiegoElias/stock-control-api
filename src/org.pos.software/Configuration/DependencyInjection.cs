@@ -36,7 +36,8 @@ public static class DependencyInjection
         {
             case "sqlserver":
                 DatabaseConfig.ConfigureSqlServer(services, connectionString);
-                services.AddScoped<UserRepository>();
+                services.AddScoped<IUserRepository, UserRepository>();
+                services.AddScoped<IRoleRepository, RoleRepository>();
                 break;
             case "supabase":
                 DatabaseConfig.ConfigureSupabase(services, connectionString);

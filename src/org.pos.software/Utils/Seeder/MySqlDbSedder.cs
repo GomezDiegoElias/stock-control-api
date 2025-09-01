@@ -9,7 +9,7 @@ namespace org.pos.software.Utils.Seeder
     public static class MySqlDbSedder
     {
 
-        
+
 
         public static async Task SeedRolesAndPermissions(MySqlDbContext context)
         {
@@ -105,6 +105,8 @@ namespace org.pos.software.Utils.Seeder
             }
 
         }
+
+        // ---- SEEDER PARA CREACION DE PROCEDIMIENTOS ALMACENADOS ----
 
         ///////////////////////////////////////////////////////////////
 

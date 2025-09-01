@@ -17,17 +17,6 @@ namespace org.pos.software.Application.Services
     public class AuthService : IAuthService
     {
 
-        //private readonly MySqlUserRepository _userRepository;
-        //private readonly MySqlRoleRepository _roleRepository;
-        //private readonly JwtConfigDto _jwtConfig;
-
-        //public AuthService(JwtConfigDto jwtConfig, MySqlUserRepository userRepository, MySqlRoleRepository roleRepository)
-        //{
-        //    _jwtConfig = jwtConfig;
-        //    _userRepository = userRepository;
-        //    _roleRepository = roleRepository;
-        //}
-
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly JwtConfigDto _jwtConfig;
@@ -51,17 +40,17 @@ namespace org.pos.software.Application.Services
 
             if (!passwordValid) throw new UnauthorizedAccessException("Invalid credentials");
 
-
             // Generacion del token
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtConfig.Secret);
 
-
             var claims = new List<Claim>
             {
                 new Claim("id", user.Id),
+                new Claim("dni", user.Dni.ToString()),
                 new Claim("email", user.Email),
                 new Claim("role", user.Role.Name)
+                // + Claims
             };
 
             // Agrega permisos como claims individuales
@@ -73,7 +62,7 @@ namespace org.pos.software.Application.Services
             // propiedades del token
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(claims),
+                Subject = new ClaimsIdentity(claims), // claims configurados
                 Expires = DateTime.UtcNow.AddMinutes(_jwtConfig.ExpirationMinutes),
                 Issuer = _jwtConfig.Issuer,
                 Audience = _jwtConfig.Audience,
@@ -85,7 +74,7 @@ namespace org.pos.software.Application.Services
 
             // respuesta del enpoint
             return new AuthResponse(
-                Message: "Login successful",
+                //Message: "Login successful",
                 AccessToken: tokenString, // muestra el token generado
                 RefreshToken: "Proximamente" // Implementar refresh token si es necesario
             );
@@ -116,6 +105,7 @@ namespace org.pos.software.Application.Services
                 .Dni(request.Dni)
                 .Email(request.Email)
                 .FirstName(request.FirstName)
+                .LastName(request.LastName)
                 .Role(Role.PRESUPUESTISTA)
                 .Status(Status.ACTIVE)
                 .Hash(hashedPassword)
@@ -132,7 +122,7 @@ namespace org.pos.software.Application.Services
 
             // respuesta del endpoint
             AuthResponse response = new AuthResponse(
-                Message: "User created successfully",
+                //Message: "User created successfully",
                 AccessToken: "",
                 RefreshToken: ""
             );

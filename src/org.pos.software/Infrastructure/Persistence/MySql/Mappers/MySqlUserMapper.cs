@@ -46,6 +46,7 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Mappers
                     domain.Dni,
                     domain.Email,
                     domain.FirstName,
+                    domain.LastName,
                     domain.Role.Name ?? string.Empty,
                     domain.Status.ToString()
                 );
