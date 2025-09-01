@@ -34,6 +34,10 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Entities
         [Column("first_name")]
         public string FirstName { get; set; }
 
+        [MaxLength(50)]
+        [Column("last_name")]
+        public string LastName { get; set; }
+
         [Required]
         public Status Status { get; set; } = Status.ACTIVE;
 
@@ -52,7 +56,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Entities
 
         public UserEntity() { }
 
-        public UserEntity(string id, long dni, string email, string hash, string salt, string firstName, Status status, int roleId)
+        public UserEntity(string id, long dni, string email, string hash, string salt, string firstName, string lastName, Status status, int roleId)
         {
             Id = id;
             Dni = dni;
@@ -60,6 +64,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Entities
             Hash = hash;
             Salt = salt;
             FirstName = firstName;
+            LastName = lastName;
             Status = status;
             RoleId = roleId;
         }

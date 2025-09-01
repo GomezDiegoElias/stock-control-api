@@ -13,13 +13,14 @@ namespace org.pos.software.Domain.Entities
         public string Hash { get; set; }
         public string Salt { get; set; }
         public string FirstName { get; set; }
+        public string LastName { get; set; }
         public Status Status { get; set; }
 
         public Role Role { get; set; }
 
         public User() { }
 
-        public User(string id, long dni, string email, string hash, string salt, string firstName, Status status)
+        public User(string id, long dni, string email, string hash, string salt, string firstName, string lastname, Status status)
         {
             Id = string.IsNullOrEmpty(id) ? GenerateId() : id;
             Dni = dni;
@@ -27,6 +28,7 @@ namespace org.pos.software.Domain.Entities
             Hash = hash;
             Salt = salt;
             FirstName = firstName;
+            LastName = lastname;
             Status = status;
         }
 

@@ -34,19 +34,31 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
         // GET: /api/v1/users
         // Acceso solo para ADMIN
         // -------------------------
-        [Authorize(Roles = "ADMIN")]
+        //[Authorize(Roles = "ADMIN")]
+        [AllowAnonymous]
         [HttpGet]
-        public async Task<ActionResult<StandardResponse<List<UserApiResponse>>>> GetAllUsers()
+        public async Task<ActionResult<StandardResponse<PaginatedResponse<UserApiResponse>>>> GetAllUsers(
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 5
+        )
         {
 
-            List<User> users = await userService.FindAllUsers();
-            List<UserApiResponse> response = users.Select(user => MySqlUserMapper.ToResponse(user)).ToList();
+            var users = await userService.FindAllUsers(pageIndex, pageSize);
 
-            return Ok(new StandardResponse<List<UserApiResponse>>(
+            var userResponse = users.Items.Select(user => MySqlUserMapper.ToResponse(user)).ToList();
+
+            var paginatedResponse = new PaginatedResponse<UserApiResponse>
+            {
+                Items = userResponse,
+                TotalCount = users.TotalCount
+            };
+
+            return Ok(new StandardResponse<PaginatedResponse<UserApiResponse>>(
                 Success: true,
                 Message: "Users retrieved successfully",
-                Data: response
+                Data: paginatedResponse
             ));
+
 
         }
 

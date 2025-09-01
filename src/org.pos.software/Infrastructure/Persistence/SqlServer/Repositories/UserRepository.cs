@@ -2,6 +2,7 @@
 using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
+using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 
 namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
 {
@@ -15,20 +16,9 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
             _context = context;
         }
 
-        public async Task<List<User>> FindAll()
+        public async Task<PaginatedResponse<User>> FindAll(int pageIndex, int pageSize)
         {
-
-            //var entities = await _context.Users.ToListAsync();
-
-            var entities = await _context.Users
-                .Include(u => u.Role)                // trae el rol
-                .ThenInclude(r => r.RolePermissions) // trae los permisos
-                .ThenInclude(rp => rp.Permission)    // trae los permisos individuales
-                .ToListAsync();
-
-            List<User> users = entities.Select(UserMapper.ToDomain).ToList();
-            return users;
-
+            return await _context.getUserPagination(pageIndex, pageSize);
         }
 
         public async Task<User?> FindByDni(long dni)

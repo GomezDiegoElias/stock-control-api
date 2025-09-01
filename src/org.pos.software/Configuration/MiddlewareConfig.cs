@@ -94,6 +94,7 @@ public static class MiddlewareConfig
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await DbSedder.SeedRolesAndPermissions(db);
         await DbSedder.SeedUserWhitDiferentRoles(db);
+        await DbSedder.SeedStoredProceduresPaginationUser(db);
 
     }
 }
