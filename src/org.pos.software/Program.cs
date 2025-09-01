@@ -17,7 +17,7 @@ CorsConfig.ConfigureServices(builder.Services, builder.Configuration);
 var app = builder.Build();
 
 // Configuración del middleware
-MiddlewareConfig.Configure(app, builder.Configuration);
+await MiddlewareConfig.Configure(app, builder.Configuration);
 
 app.MapGet("/", () =>
 {
