@@ -4,6 +4,7 @@
         long Dni,
         string Email,
         string Password,
-        string FirstName
+        string FirstName,
+        string LastName
     ) { }
 }
