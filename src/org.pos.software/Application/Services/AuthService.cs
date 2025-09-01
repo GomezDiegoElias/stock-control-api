@@ -105,6 +105,7 @@ namespace org.pos.software.Application.Services
                 .Dni(request.Dni)
                 .Email(request.Email)
                 .FirstName(request.FirstName)
+                .LastName(request.LastName)
                 .Role(Role.PRESUPUESTISTA)
                 .Status(Status.ACTIVE)
                 .Hash(hashedPassword)
