@@ -16,6 +16,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
         public DbSet<RoleEntity> Roles { get; set; }
         public DbSet<PermissionEntity> Permissions { get; set; }
         public DbSet<RolePermissionEntity> RolePermissions { get; set; }
+        public DbSet<ClientEntity> Clients { get; set; }
 
         // Metodo para la paginacion de usuarios
         public async Task<PaginatedResponse<User>> getUserPagination(int pageIndex, int pageSize)
@@ -105,6 +106,11 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
                 .WithMany(p => p.RolePermissions)
                 .HasForeignKey(rp => rp.PermissionId)
                 .IsRequired();
+
+            // CLIENT
+            modelBuilder.Entity<ClientEntity>()
+                .HasIndex(c => c.Dni)
+                .IsUnique();
 
         }
 
