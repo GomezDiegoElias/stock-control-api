@@ -16,6 +16,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Mappers
                 .Hash(entity.Hash)
                 .Salt(entity.Salt)
                 .FirstName(entity.FirstName)
+                .LastName(entity.LastName)
                 .Status(entity.Status)
                 //.Role(new Role(entity.Role.Name, entity.Role.RolePermissions.Select(rp => rp.Permission.Name) ?? Enumerable.Empty<string>())) // asigna rol con permisos
                 .Role(new Role(entity.Role.Name, entity.Role.RolePermissions.Select(rp => rp.Permission.Name)))
@@ -31,6 +32,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Mappers
                 domain.Hash,
                 domain.Salt,
                 domain.FirstName,
+                domain.LastName,
                 domain.Status,
                 roleEntity.Id
             )
@@ -46,6 +48,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Mappers
                     domain.Dni,
                     domain.Email,
                     domain.FirstName,
+                    domain.LastName ?? string.Empty,
                     domain.Role.Name ?? string.Empty,
                     domain.Status.ToString()
                 );
