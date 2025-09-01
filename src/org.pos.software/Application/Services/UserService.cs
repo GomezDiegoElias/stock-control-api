@@ -4,6 +4,7 @@ using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
 using org.pos.software.Infrastructure.Persistence.Supabase.Repositories;
+using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 
 namespace org.pos.software.Application.Services
 {
@@ -17,9 +18,9 @@ namespace org.pos.software.Application.Services
             _userRepository = userRepository;
         }
 
-        public async Task<List<User>> FindAllUsers()
+        public async Task<PaginatedResponse<User>> FindAllUsers(int pageIndex, int pageSize)
         {
-            return await _userRepository.FindAll();
+            return await _userRepository.FindAll(pageIndex, pageSize);
         }
 
         public Task<User?> FindByDni(long dni)
