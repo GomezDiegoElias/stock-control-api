@@ -104,6 +104,38 @@ namespace org.pos.software.Utils.Seeder
         }
 
         // ---- SEEDER PARA CREACION DE PROCEDIMIENTOS ALMACENADOS ----
+        public static async Task SeedStoredProceduresPaginationUser(AppDbContext context)
+        {
+            await context.Database.ExecuteSqlRawAsync(@"
+            IF OBJECT_ID('getUserPagination', 'P') IS NOT NULL
+                DROP PROCEDURE getUserPagination;
+            ");
+
+            await context.Database.ExecuteSqlRawAsync(@"
+                CREATE PROCEDURE getUserPagination 
+                    @PageIndex INT = 1,
+                    @PageSize INT = 10
+                AS
+                BEGIN
+                    DECLARE @Offset INT = (@PageSize * (@PageIndex - 1));
+
+                    SELECT
+                        u.id,
+                        u.dni,
+                        u.email,
+                        u.first_name,
+                        r.name as role,
+                        u.Status,
+                        ROW_NUMBER() OVER(ORDER BY u.id ASC) AS Fila,
+                        COUNT(*) OVER() AS TotalFilas
+                    FROM tbl_user u
+                    JOIN tbl_role r on u.role_id = r.id
+                    ORDER BY u.id ASC
+                    OFFSET @Offset ROWS
+                    FETCH NEXT @PageSize ROWS ONLY
+                END
+            ");
+        }
 
         ///////////////////////////////////////////////////////////////
 
