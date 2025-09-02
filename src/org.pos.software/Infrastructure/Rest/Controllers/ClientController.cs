@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using org.pos.software.Application.InPort;
+using org.pos.software.Domain.Exceptions;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
 using org.pos.software.Infrastructure.Rest.Dto.Request;
 using org.pos.software.Infrastructure.Rest.Dto.Response;
@@ -39,9 +40,15 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
         [AllowAnonymous]
         [HttpGet("{dni:long}")]
-        public async Task<ActionResult<StandardResponse<ClientApiResponse>>> FindClientByDni()
+        public async Task<ActionResult<StandardResponse<ClientApiResponse>>> FindClientByDni(long dni)
         {
-            return null;
+         
+            var client = await _service.FindByDni(dni);
+            if (client == null) throw new ClientNotFoundException(dni.ToString());
+
+            var response = ClientMapper.ToResponse(client);
+            return Ok(new StandardResponse<ClientApiResponse>(true, "Cliente obtenido exitosamente", response));
+
         }
 
         // post -> save client
