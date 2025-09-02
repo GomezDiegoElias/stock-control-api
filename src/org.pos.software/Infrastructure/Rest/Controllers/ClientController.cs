@@ -70,11 +70,9 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
             var newClient = ClientMapper.ToDomain(request);
             var savedResponse = await _service.Save(newClient);
-            var clientResponse = ClientMapper.ToResponse(savedResponse);
+            var response = ClientMapper.ToResponse(savedResponse);
 
-            var response = new StandardResponse<ClientApiResponse>(true, "Created client successfully", clientResponse, null, 201);
-
-            return Created(string.Empty, response);
+            return Created(string.Empty, new StandardResponse<ClientApiResponse>(true, "Created client successfully", response, null, 201));
 
         }
 
