@@ -32,6 +32,7 @@ public static class MiddlewareConfig
                         ApplicationException => 400,
                         // Excepciones personalizas
                         UserNotFoundException => 404,
+                        ClientNotFoundException => 404,
                         _ => 500 // Internal Server
                     };
 
