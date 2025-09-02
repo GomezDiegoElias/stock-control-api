@@ -1,5 +1,6 @@
 ﻿using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.OutPort;
+using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
 
 namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
 {
@@ -28,9 +29,12 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<Client> Save(Client client)
+        public async Task<Client> Save(Client client)
         {
-            throw new NotImplementedException();
+            var entity = ClientMapper.ToEntity(client);
+            _context.Clients.Add(entity);
+            await _context.SaveChangesAsync();
+            return ClientMapper.ToDomain(entity);
         }
 
         public Task<Client> Update(Client client)
