@@ -18,6 +18,13 @@
             Address = address;
         }
 
+        public Client(long dni, string firstname, string address)
+        {
+            Dni = dni;
+            FirstName = firstname;
+            Address = address;
+        }
+
         public static string GenerateId()
         {
             string timestap = DateTimeOffset.UtcNow.ToString("yyyyMMddHHmmss");
