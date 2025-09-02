@@ -32,7 +32,8 @@ namespace org.pos.software.Application.Services
 
         public Task<Client> Save(Client client)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(client.Id)) client.Id = Client.GenerateId();
+            return _repository.Save(client);
         }
 
         public Task<Client> Update(Client client)
