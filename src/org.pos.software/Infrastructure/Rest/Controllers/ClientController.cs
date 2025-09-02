@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using org.pos.software.Application.InPort;
+using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
+using org.pos.software.Infrastructure.Rest.Dto.Request;
 using org.pos.software.Infrastructure.Rest.Dto.Response;
 using org.pos.software.Infrastructure.Rest.Dto.Response.General;
+using org.pos.software.Utils.Validations;
 
 namespace org.pos.software.Infrastructure.Rest.Controllers
 {
@@ -10,14 +14,16 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
     [Authorize(Roles = "ADMIN")]
     [ApiController]
     [Route("/api/v1/clients")]
-    public class ClientController
+    public class ClientController : Controller
     {
 
         private readonly IClientService _service;
+        private readonly ClientValidation _validation;
 
-        public ClientController(IClientService service)
+        public ClientController(IClientService service, ClientValidation validation)
         {
             _service = service;
+            _validation = validation;
         }
 
         //[Authorize]
@@ -39,6 +45,33 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
         }
 
         // post -> save client
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<ActionResult<StandardResponse<ClientApiResponse>>> CreatedClient(
+            [FromBody] ClientApiRequest request   
+        )
+        {
+
+            var validationResult = await _validation.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+                var errors = new ErrorDetails(400, "Validation failed", HttpContext.Request.Path, validationErrors);
+                return new StandardResponse<ClientApiResponse>(false, "Something went wrong", null, errors, 400);
+            }
+
+            var newClient = ClientMapper.ToDomain(request);
+            var savedResponse = await _service.Save(newClient);
+            var clientResponse = ClientMapper.ToResponse(savedResponse);
+
+            var response = new StandardResponse<ClientApiResponse>(true, "Created client successfully", clientResponse, null, 201);
+
+            return Created(string.Empty, response);
+
+        }
+
+
         // put -> update client
         // delete -> delete client
 
