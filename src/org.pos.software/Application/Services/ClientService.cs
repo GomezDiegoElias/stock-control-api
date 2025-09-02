@@ -25,9 +25,9 @@ namespace org.pos.software.Application.Services
             throw new NotImplementedException();
         }
 
-        public Task<Client> FindByDni(long dni)
+        public async Task<Client?> FindByDni(long dni)
         {
-            throw new NotImplementedException();
+            return await _repository.FindByDni(dni);
         }
 
         public Task<Client> Save(Client client)
