@@ -68,7 +68,6 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
         }
 
-        // post -> save client
         [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<StandardResponse<ClientApiResponse>>> CreatedClient(
@@ -93,8 +92,6 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
         }
 
-
-        // put -> update client
         [AllowAnonymous]
         [HttpPut("{dni:long}")]
         public async Task<ActionResult<StandardResponse<ClientApiResponse>>> UpdateClient(
@@ -126,10 +123,8 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
         }
 
-
-        // delete -> delete client
         [AllowAnonymous]
-        [HttpDelete("{dni:long}")]
+        [HttpDelete("permanent/{dni:long}")]
         public async Task<ActionResult<StandardResponse<ClientApiResponse>>> DeleteClient(long dni)
         {
 
@@ -138,6 +133,18 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             if (existingClient == null) throw new ClientNotFoundException(dni.ToString());
 
             var deletedClient = await _service.Delete(dni);
+            var response = ClientMapper.ToResponse(deletedClient);
+
+            return Ok(new StandardResponse<ClientApiResponse>(true, "Cliente eliminado exitosamente", response));
+
+        }
+
+        [AllowAnonymous]
+        [HttpDelete("{dni:long}")]
+        public async Task<ActionResult<StandardResponse<ClientApiRequest>>> DeleteClientLogic(long dni)
+        {
+
+            var deletedClient = await _service.DeleteLogic(dni);
             var response = ClientMapper.ToResponse(deletedClient);
 
             return Ok(new StandardResponse<ClientApiResponse>(true, "Cliente eliminado exitosamente", response));
