@@ -17,9 +17,18 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
             _context = context;
         }
 
-        public Task<Client> Delete(long dni)
+        public async Task<Client> Delete(long dni)
         {
-            throw new NotImplementedException();
+            
+            var entity = _context.Clients.FirstOrDefault(x => x.Dni == dni);
+
+            if (entity == null) throw new ClientNotFoundException($"No se encontró cliente con DNI {dni}");
+
+            _context.Clients.Remove(entity);
+            await _context.SaveChangesAsync();
+
+            return ClientMapper.ToDomain(entity);
+
         }
 
         public async Task<PaginatedResponse<Client>> FindAll(int pageIndex, int pageSize)
