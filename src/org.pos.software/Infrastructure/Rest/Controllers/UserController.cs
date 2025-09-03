@@ -50,7 +50,10 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             var paginatedResponse = new PaginatedResponse<UserApiResponse>
             {
                 Items = userResponse,
-                TotalCount = users.TotalCount
+                PageIndex = users.PageIndex,
+                PageSize = users.PageSize,
+                TotalItems = users.TotalItems,
+                TotalPages = users.TotalPages
             };
 
             return Ok(new StandardResponse<PaginatedResponse<UserApiResponse>>(
