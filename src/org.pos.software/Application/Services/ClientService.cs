@@ -34,7 +34,7 @@ namespace org.pos.software.Application.Services
 
         public Task<Client> Update(Client client)
         {
-            throw new NotImplementedException();
+            return _repository.Update(client);
         }
 
         public Task<Client> Delete(long id)
