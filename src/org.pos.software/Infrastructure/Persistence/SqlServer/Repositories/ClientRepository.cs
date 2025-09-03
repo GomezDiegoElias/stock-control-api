@@ -79,6 +79,20 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
             return ClientMapper.ToDomain(existingEntity);
         }
 
+        public async Task<Client> UpdatePartial(Client client)
+        {
+            
+            var existingEntity = await _context.Clients.FirstOrDefaultAsync(c => c.Dni == client.Dni);
+            if (existingEntity == null) throw new ClientNotFoundException($"No se encontró cliente con DNI {client.Dni}");
 
+            existingEntity.Dni = client.Dni;
+            existingEntity.FirstName = client.FirstName;
+            existingEntity.Address = client.Address;
+            existingEntity.UpdatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") != null ? DateTime.Now : DateTime.MinValue;
+
+            await _context.SaveChangesAsync();
+            return ClientMapper.ToDomain(existingEntity);
+
+        }
     }
 }
