@@ -178,6 +178,37 @@ namespace org.pos.software.Utils.Seeder
             ");
         }
 
+        public static async Task SeedStoredProceduresPaginationClient(AppDbContext context)
+        {
+            await context.Database.ExecuteSqlRawAsync(@"
+            IF OBJECT_ID('getClientPagination', 'P') IS NOT NULL
+                DROP PROCEDURE getClientPagination;
+            ");
+
+            await context.Database.ExecuteSqlRawAsync(@"
+                CREATE PROCEDURE getClientPagination 
+                    @PageIndex INT = 1,
+                    @PageSize INT = 10
+                AS
+                BEGIN
+                    DECLARE @Offset INT = (@PageSize * (@PageIndex - 1));
+
+                    SELECT
+                        c.id,
+                        c.dni,
+                        c.first_name,
+		                c.[address],
+                        ROW_NUMBER() OVER(ORDER BY c.dni ASC) AS Fila,
+                        COUNT(*) OVER() AS TotalFilas
+                    FROM tbl_client c
+	                WHERE c.is_deleted = 0
+                    ORDER BY c.first_name ASC
+                    OFFSET @Offset ROWS
+                    FETCH NEXT @PageSize ROWS ONLY
+                END
+            ");
+        }
+
         ///////////////////////////////////////////////////////////////
 
     }
