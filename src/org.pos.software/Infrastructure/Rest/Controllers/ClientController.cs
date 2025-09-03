@@ -81,15 +81,15 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             if (!validationResult.IsValid)
             {
                 var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
-                var errors = new ErrorDetails(400, "Validation failed", HttpContext.Request.Path, validationErrors);
-                return new StandardResponse<ClientApiResponse>(false, "Something went wrong", null, errors, 400);
+                var errors = new ErrorDetails(400, "Validacion fallida", HttpContext.Request.Path, validationErrors);
+                return new StandardResponse<ClientApiResponse>(false, "Ah ocurrido un error", null, errors, 400);
             }
 
             var newClient = ClientMapper.ToDomain(request);
             var savedResponse = await _service.Save(newClient);
             var response = ClientMapper.ToResponse(savedResponse);
 
-            return Created(string.Empty, new StandardResponse<ClientApiResponse>(true, "Created client successfully", response, null, 201));
+            return Created(string.Empty, new StandardResponse<ClientApiResponse>(true, "Cliente creado exitosamente", response, null, 201));
 
         }
 
