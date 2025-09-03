@@ -43,7 +43,7 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
                 Items = clientResponse,
                 PageIndex = clients.PageIndex,
                 PageSize = clients.PageSize,
-                TotalCount = clients.TotalCount,
+                TotalItems = clients.TotalItems,
                 TotalPages = clients.TotalPages
             };
 
