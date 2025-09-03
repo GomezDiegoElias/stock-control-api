@@ -3,6 +3,6 @@
     public class UserNotFoundException : Exception
     {
         public UserNotFoundException(string dni)
-            : base($"User whit DNI {dni} not found") { }
+            : base($"Usuario con DNI {dni} no existe") { }
     }
 }

@@ -50,12 +50,15 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             var paginatedResponse = new PaginatedResponse<UserApiResponse>
             {
                 Items = userResponse,
-                TotalCount = users.TotalCount
+                PageIndex = users.PageIndex,
+                PageSize = users.PageSize,
+                TotalItems = users.TotalItems,
+                TotalPages = users.TotalPages
             };
 
             return Ok(new StandardResponse<PaginatedResponse<UserApiResponse>>(
                 Success: true,
-                Message: "Users retrieved successfully",
+                Message: "Usuarios obtenidos exitosamente",
                 Data: paginatedResponse
             ));
 
@@ -77,7 +80,7 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             if (user == null) throw new UserNotFoundException(dni.ToString());
 
             var response = MySqlUserMapper.ToResponse(user);
-            return Ok(new StandardResponse<UserApiResponse>(true, "User retrieved successfully", response));
+            return Ok(new StandardResponse<UserApiResponse>(true, "Usuario obtenido exitosamente", response));
 
         }
 

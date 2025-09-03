@@ -38,6 +38,7 @@ public static class DependencyInjection
                 DatabaseConfig.ConfigureSqlServer(services, connectionString);
                 services.AddScoped<IUserRepository, UserRepository>();
                 services.AddScoped<IRoleRepository, RoleRepository>();
+                services.AddScoped<IClientRepository, ClientRepository>();
                 break;
             case "supabase":
                 DatabaseConfig.ConfigureSupabase(services, connectionString);
@@ -74,6 +75,7 @@ public static class DependencyInjection
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IClientService, ClientService>();
 
         // politicas / restricciones
         services.AddAuthorization(options =>

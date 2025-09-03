@@ -1,0 +1,225 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc;
+using org.pos.software.Application.InPort;
+using org.pos.software.Domain.Entities;
+using org.pos.software.Domain.Exceptions;
+using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
+using org.pos.software.Infrastructure.Rest.Dto.Request;
+using org.pos.software.Infrastructure.Rest.Dto.Response;
+using org.pos.software.Infrastructure.Rest.Dto.Response.General;
+using org.pos.software.Utils.Validations;
+
+namespace org.pos.software.Infrastructure.Rest.Controllers
+{
+
+    [Authorize(Roles = "ADMIN")]
+    [ApiController]
+    [Route("/api/v1/clients")]
+    public class ClientController : Controller
+    {
+
+        private readonly IClientService _service;
+        private readonly ClientValidation _validation;
+
+        public ClientController(IClientService service, ClientValidation validation)
+        {
+            _service = service;
+            _validation = validation;
+        }
+
+        //[Authorize]
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<ActionResult<StandardResponse<PaginatedResponse<ClientApiResponse>>>> FindAllClients(
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 5
+        )
+        {
+
+            var clients = await _service.FindAll(pageIndex, pageSize);
+            var clientResponse = clients.Items.Select(c => ClientMapper.ToResponse(c)).ToList();
+
+            var paginatedResponse = new PaginatedResponse<ClientApiResponse>
+            {
+                Items = clientResponse,
+                PageIndex = clients.PageIndex,
+                PageSize = clients.PageSize,
+                TotalItems = clients.TotalItems,
+                TotalPages = clients.TotalPages
+            };
+
+            return Ok(new StandardResponse<PaginatedResponse<ClientApiResponse>>(
+                Success: true,
+                Message: "Clientes obtenidos exitosamente",
+                Data: paginatedResponse
+            ));
+
+        }
+
+        [AllowAnonymous]
+        [HttpGet("{dni:long}")]
+        public async Task<ActionResult<StandardResponse<ClientApiResponse>>> FindClientByDni(long dni)
+        {
+         
+            var client = await _service.FindByDni(dni);
+            if (client == null) throw new ClientNotFoundException(dni.ToString());
+
+            var response = ClientMapper.ToResponse(client);
+            return Ok(new StandardResponse<ClientApiResponse>(true, "Cliente obtenido exitosamente", response));
+
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<ActionResult<StandardResponse<ClientApiResponse>>> CreatedClient(
+            [FromBody] ClientApiRequest request   
+        )
+        {
+
+            var validationResult = await _validation.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+                var errors = new ErrorDetails(400, "Validacion fallida", HttpContext.Request.Path, validationErrors);
+                return new StandardResponse<ClientApiResponse>(false, "Ah ocurrido un error", null, errors, 400);
+            }
+
+            var newClient = ClientMapper.ToDomain(request);
+            var savedResponse = await _service.Save(newClient);
+            var response = ClientMapper.ToResponse(savedResponse);
+
+            return Created(string.Empty, new StandardResponse<ClientApiResponse>(true, "Cliente creado exitosamente", response, null, 201));
+
+        }
+
+        [AllowAnonymous]
+        [HttpPut("{dni:long}")]
+        public async Task<ActionResult<StandardResponse<ClientApiResponse>>> UpdateClient(
+            [FromBody] ClientApiRequest request,
+            long dni
+        )
+        {
+
+            var existingClient = await _service.FindByDni(dni);
+
+            if (existingClient == null) throw new ClientNotFoundException(dni.ToString());
+
+            var validationResult = await _validation.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+                var errors = new ErrorDetails(400, "Validacion fallida", HttpContext.Request.Path, validationErrors);
+                return new StandardResponse<ClientApiResponse>(false, "Ah ocurrido un error", null, errors, 400);
+            }
+
+            var clientToUpdate = ClientMapper.ToDomain(request);
+            clientToUpdate.Id = existingClient.Id;
+
+            var updatedClient = await _service.Update(clientToUpdate);
+            var response = ClientMapper.ToResponse(updatedClient);
+
+            return Ok(new StandardResponse<ClientApiResponse>(true, "Cliente actualizado exitosamente", response));
+
+        }
+
+        [AllowAnonymous]
+        [HttpDelete("permanent/{dni:long}")]
+        public async Task<ActionResult<StandardResponse<ClientApiResponse>>> DeleteClient(long dni)
+        {
+
+            var existingClient = await _service.FindByDni(dni);
+
+            if (existingClient == null) throw new ClientNotFoundException(dni.ToString());
+
+            var deletedClient = await _service.DeletePermanent(dni);
+            var response = ClientMapper.ToResponse(deletedClient);
+
+            return Ok(new StandardResponse<ClientApiResponse>(true, "Cliente eliminado exitosamente", response));
+
+        }
+
+        [AllowAnonymous]
+        [HttpDelete("{dni:long}")]
+        public async Task<ActionResult<StandardResponse<ClientApiRequest>>> DeleteClientLogic(long dni)
+        {
+
+            var deletedClient = await _service.DeleteLogic(dni);
+            var response = ClientMapper.ToResponse(deletedClient);
+
+            return Ok(new StandardResponse<ClientApiResponse>(true, "Cliente eliminado exitosamente", response));
+
+        }
+
+        [AllowAnonymous]
+        [HttpPatch("{dni:long}")]
+        public async Task<ActionResult<StandardResponse<ClientApiResponse>>> UpdatePartialClient(
+            long dni,
+            [FromBody] JsonPatchDocument<ClientApiRequest> patchDoc
+        )
+        {
+            if (patchDoc == null)
+            {
+                var errors = new ErrorDetails(
+                    400,
+                    "El documento de parcheo no puede ser nulo",
+                    HttpContext.Request.Path,
+                    "El documento de parcheo no puede ser nulo"
+                );
+                return BadRequest(new StandardResponse<ClientApiResponse>(
+                    false, "Ha ocurrido un error", null, errors, 400
+                ));
+            }
+
+            var existingClient = await _service.FindByDni(dni);
+            if (existingClient == null)
+                throw new ClientNotFoundException(dni.ToString());
+
+            // Convertir el cliente existente a DTO para aplicar el patch
+            var clientToPatch = ClientMapper.ToRequest(existingClient);
+
+            // Aplicar el patch al DTO
+            var modelState = new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary();
+            patchDoc.ApplyTo(clientToPatch, modelState);
+
+            // Verificar si hay errores en la aplicación del patch
+            if (!modelState.IsValid)
+            {
+                var patchErrors = string.Join("; ", modelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage));
+
+                var errors = new ErrorDetails(400, "Error aplicando patch", HttpContext.Request.Path, patchErrors);
+                return BadRequest(new StandardResponse<ClientApiResponse>(false, "Error en patch", null, errors, 400));
+            }
+
+            // Validar el DTO modificado
+            var validationResult = await _validation.ValidateAsync(clientToPatch);
+            if (!validationResult.IsValid)
+            {
+                var validationErrors = string.Join("; ", validationResult.Errors
+                    .Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+
+                var errors = new ErrorDetails(400, "Validación fallida", HttpContext.Request.Path, validationErrors);
+                return BadRequest(new StandardResponse<ClientApiResponse>(false, "Error en validación", null, errors, 400));
+            }
+
+            // Convertir de vuelta a dominio y mantener el ID original
+            var clientDomain = ClientMapper.ToDomain(clientToPatch);
+            clientDomain.Id = existingClient.Id;
+
+            // Actualizar en la base de datos
+            var updatedClient = await _service.Update(clientDomain);
+            var response = ClientMapper.ToResponse(updatedClient);
+
+            return Ok(new StandardResponse<ClientApiResponse>(
+                true, "Cliente actualizado exitosamente", response
+            ));
+        }
+
+
+
+    }
+}
