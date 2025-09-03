@@ -22,7 +22,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
         public async Task<PaginatedResponse<User>> getUserPagination(int pageIndex, int pageSize)
         {
             var users = new List<User>();
-            var totalCount = 0;
+            var totalItems = 0;
 
             using var connection = new SqlConnection(Database.GetConnectionString());
             await connection.OpenAsync();
@@ -47,18 +47,68 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
                     .Build()
                 );
 
-                if (totalCount == 0)
+                if (totalItems == 0)
                 {
-                    totalCount = Convert.ToInt32(reader["TotalFilas"]);
+                    totalItems = Convert.ToInt32(reader["TotalFilas"]);
                 }
             }
 
             await connection.CloseAsync();
 
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
             return new PaginatedResponse<User>
             {
                 Items = users,
-                TotalCount = totalCount
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                TotalCount = totalItems,
+                TotalPages = totalPages
+            };
+        }
+
+        // Metodo para la paginacion de clientes
+        public async Task<PaginatedResponse<Client>> getClientPagination(int pageIndex, int pageSize)
+        {
+            var clients = new List<Client>();
+            var totalItems = 0;
+
+            using var connection = new SqlConnection(Database.GetConnectionString());
+            await connection.OpenAsync();
+
+            using var command = new SqlCommand("getClientPagination", connection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("@PageIndex", pageIndex);
+            command.Parameters.AddWithValue("@PageSize", pageSize);
+
+            using var reader = await command.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                clients.Add(new Client(
+                        reader["id"].ToString(),
+                        Convert.ToInt64(reader["dni"]),
+                        reader["first_name"].ToString(),
+                        reader["address"].ToString()
+                        ));
+
+                if (totalItems == 0)
+                {
+                    totalItems = Convert.ToInt32(reader["TotalFilas"]);
+                }
+            }
+
+            await connection.CloseAsync(); 
+
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            return new PaginatedResponse<Client>
+            {
+                Items = clients,
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                TotalCount = totalItems,
+                TotalPages = totalPages
             };
         }
 
