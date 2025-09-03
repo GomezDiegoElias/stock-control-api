@@ -40,13 +40,13 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             if (!validationResult.IsValid)
             {
                 var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
-                var errors = new ErrorDetails(400, "Validation failed", HttpContext.Request.Path, validationErrors);
-                return new StandardResponse<AuthResponse>(false, "Something went wrong", null, errors, 400);
+                var errors = new ErrorDetails(400, "Validacion fallida", HttpContext.Request.Path, validationErrors);
+                return new StandardResponse<AuthResponse>(false, "Ah ocurrido un error", null, errors, 400);
             }
 
             var registerResponse = await _authService.Register(request);
 
-            var response = new StandardResponse<AuthResponse>(true, "Register successfully", registerResponse);
+            var response = new StandardResponse<AuthResponse>(true, "Registro exitosamente", registerResponse);
 
             return Ok(response);
 
@@ -63,13 +63,13 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             if (!validationResult.IsValid)
             {
                 var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
-                var errors = new ErrorDetails(400, "Validation failed", HttpContext.Request.Path, validationErrors);
-                return new StandardResponse<AuthResponse>(false, "Something went wrong", null, errors, 400);
+                var errors = new ErrorDetails(400, "Validacion fallida", HttpContext.Request.Path, validationErrors);
+                return new StandardResponse<AuthResponse>(false, "Ah ocurrido un error", null, errors, 400);
             }
 
             var loginResponse = await _authService.Login(request);
 
-            var response = new StandardResponse<AuthResponse>(true, "Login successfully", loginResponse);
+            var response = new StandardResponse<AuthResponse>(true, "Inicio de sesion exitoso", loginResponse);
 
             return Ok(response);
 
