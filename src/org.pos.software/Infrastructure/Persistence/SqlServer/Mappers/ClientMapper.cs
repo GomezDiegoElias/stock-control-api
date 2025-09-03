@@ -27,5 +27,15 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Mappers
             return new Client(request.Dni, request.FirstName, request.Address);
         }
 
+        public static ClientApiRequest ToRequest(Client domain)
+        {
+            return new ClientApiRequest
+            {
+                Dni = domain.Dni,
+                FirstName = domain.FirstName,
+                Address = domain.Address
+            };
+        }
+
     }
 }
