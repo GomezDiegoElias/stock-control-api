@@ -32,14 +32,14 @@ namespace org.pos.software.Application.Services
             return _repository.Save(client);
         }
 
-        public Task<Client> Update(Client client)
+        public async Task<Client> Update(Client client)
         {
-            return _repository.Update(client);
+            return await _repository.Update(client);
         }
 
-        public Task<Client> Delete(long id)
+        public async Task<Client> Delete(long id)
         {
-            throw new NotImplementedException();
+            return await _repository.Delete(id);
         }
 
     }
