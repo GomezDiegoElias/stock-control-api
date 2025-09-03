@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using org.pos.software.Application.InPort;
+using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.Exceptions;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
 using org.pos.software.Infrastructure.Rest.Dto.Request;
@@ -150,6 +152,74 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             return Ok(new StandardResponse<ClientApiResponse>(true, "Cliente eliminado exitosamente", response));
 
         }
+
+        [AllowAnonymous]
+        [HttpPatch("{dni:long}")]
+        public async Task<ActionResult<StandardResponse<ClientApiResponse>>> UpdatePartialClient(
+            long dni,
+            [FromBody] JsonPatchDocument<ClientApiRequest> patchDoc
+        )
+        {
+            if (patchDoc == null)
+            {
+                var errors = new ErrorDetails(
+                    400,
+                    "El documento de parcheo no puede ser nulo",
+                    HttpContext.Request.Path,
+                    "El documento de parcheo no puede ser nulo"
+                );
+                return BadRequest(new StandardResponse<ClientApiResponse>(
+                    false, "Ha ocurrido un error", null, errors, 400
+                ));
+            }
+
+            var existingClient = await _service.FindByDni(dni);
+            if (existingClient == null)
+                throw new ClientNotFoundException(dni.ToString());
+
+            // Convertir el cliente existente a DTO para aplicar el patch
+            var clientToPatch = ClientMapper.ToRequest(existingClient);
+
+            // Aplicar el patch al DTO
+            var modelState = new Microsoft.AspNetCore.Mvc.ModelBinding.ModelStateDictionary();
+            patchDoc.ApplyTo(clientToPatch, modelState);
+
+            // Verificar si hay errores en la aplicación del patch
+            if (!modelState.IsValid)
+            {
+                var patchErrors = string.Join("; ", modelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage));
+
+                var errors = new ErrorDetails(400, "Error aplicando patch", HttpContext.Request.Path, patchErrors);
+                return BadRequest(new StandardResponse<ClientApiResponse>(false, "Error en patch", null, errors, 400));
+            }
+
+            // Validar el DTO modificado
+            var validationResult = await _validation.ValidateAsync(clientToPatch);
+            if (!validationResult.IsValid)
+            {
+                var validationErrors = string.Join("; ", validationResult.Errors
+                    .Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+
+                var errors = new ErrorDetails(400, "Validación fallida", HttpContext.Request.Path, validationErrors);
+                return BadRequest(new StandardResponse<ClientApiResponse>(false, "Error en validación", null, errors, 400));
+            }
+
+            // Convertir de vuelta a dominio y mantener el ID original
+            var clientDomain = ClientMapper.ToDomain(clientToPatch);
+            clientDomain.Id = existingClient.Id;
+
+            // Actualizar en la base de datos
+            var updatedClient = await _service.Update(clientDomain);
+            var response = ClientMapper.ToResponse(updatedClient);
+
+            return Ok(new StandardResponse<ClientApiResponse>(
+                true, "Cliente actualizado exitosamente", response
+            ));
+        }
+
+
 
     }
 }
