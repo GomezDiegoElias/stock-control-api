@@ -40,7 +40,7 @@ public static class MiddlewareConfig
 
                     var error = new ErrorDetails(statusCode, ex.Message, context.Request.Path, null); // ex.StackTrace
 
-                    var response = new StandardResponse<string>(false, "Something went wrong", null, error, statusCode);
+                    var response = new StandardResponse<string>(false, "Ah ocurrido un error", null, error, statusCode);
 
                     await context.Response.WriteAsJsonAsync(response);
 
@@ -60,7 +60,7 @@ public static class MiddlewareConfig
                 await context.Response.WriteAsJsonAsync(new
                 {
                     StatusCode = 404,
-                    Message = $"The endpoint {context.Request.Path} was not found."
+                    Message = $"La url {context.Request.Path} no existe."
                 });
             }
         });
