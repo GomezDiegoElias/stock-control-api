@@ -134,7 +134,7 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
             if (existingClient == null) throw new ClientNotFoundException(dni.ToString());
 
-            var deletedClient = await _service.Delete(dni);
+            var deletedClient = await _service.DeletePermanent(dni);
             var response = ClientMapper.ToResponse(deletedClient);
 
             return Ok(new StandardResponse<ClientApiResponse>(true, "Cliente eliminado exitosamente", response));
