@@ -2,6 +2,7 @@
 using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
+using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 
 namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
 {
@@ -20,9 +21,9 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<Client> FindAll(int pageIndex, int pageSize)
+        public async Task<PaginatedResponse<Client>> FindAll(int pageIndex, int pageSize)
         {
-            throw new NotImplementedException();
+            return await _context.getClientPagination(pageIndex, pageSize);
         }
 
         public async Task<Client?> FindByDni(long dni)
