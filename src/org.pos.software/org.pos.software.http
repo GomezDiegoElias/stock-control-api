@@ -51,3 +51,22 @@ Content-Type: application/json
 }
 
 ###
+
+PATCH {{url}}/api/v1/clients/29626101
+Content-Type: application/json-patch+json
+
+[
+  { "op": "replace", "path": "/firstName", "value": "Ramon Esteban" },
+  { "op": "replace", "path": "/address", "value": "Av Nicaragua 1371" }
+]
+
+###
+
+PATCH {{url}}/api/v1/clients/44745058
+Content-Type: application/json-patch+json
+
+[
+  { "op": "replace", "path": "/address", "value": "Roque Saenz Peña 2940" }
+]
+
+###
