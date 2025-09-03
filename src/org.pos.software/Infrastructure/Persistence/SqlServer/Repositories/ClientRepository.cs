@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using org.pos.software.Domain.Entities;
+using org.pos.software.Domain.Exceptions;
 using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
 using org.pos.software.Infrastructure.Rest.Dto.Response.General;
@@ -40,10 +41,22 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
             return ClientMapper.ToDomain(entity);
         }
 
-        public Task<Client> Update(Client client)
+        public async Task<Client> Update(Client client)
         {
-            throw new NotImplementedException();
+            var existingEntity = await _context.Clients.FirstOrDefaultAsync(c => c.Id == client.Id);
+            if (existingEntity == null)
+                throw new ClientNotFoundException($"No se encontró cliente con Id {client.Id}");
+
+            // Actualizar solo los campos necesarios
+            existingEntity.Dni = client.Dni;
+            existingEntity.FirstName = client.FirstName;
+            existingEntity.Address = client.Address;
+            existingEntity.UpdatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") != null ? DateTime.Now : DateTime.MinValue;
+
+            await _context.SaveChangesAsync();
+            return ClientMapper.ToDomain(existingEntity);
         }
+
 
     }
 }
