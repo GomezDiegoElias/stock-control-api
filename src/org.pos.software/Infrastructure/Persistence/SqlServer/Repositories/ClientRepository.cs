@@ -17,7 +17,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
             _context = context;
         }
 
-        public async Task<Client> Delete(long dni)
+        public async Task<Client> DeletePermanent(long dni)
         {
             
             var entity = _context.Clients.FirstOrDefault(x => x.Dni == dni);
