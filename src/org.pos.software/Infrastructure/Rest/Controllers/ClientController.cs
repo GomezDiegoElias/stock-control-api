@@ -95,6 +95,38 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
 
         // put -> update client
+        [AllowAnonymous]
+        [HttpPut("{dni:long}")]
+        public async Task<ActionResult<StandardResponse<ClientApiResponse>>> UpdateClient(
+            [FromBody] ClientApiRequest request,
+            long dni
+        )
+        {
+
+            var existingClient = await _service.FindByDni(dni);
+
+            if (existingClient == null) throw new ClientNotFoundException(dni.ToString());
+
+            var validationResult = await _validation.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+                var errors = new ErrorDetails(400, "Validacion fallida", HttpContext.Request.Path, validationErrors);
+                return new StandardResponse<ClientApiResponse>(false, "Ah ocurrido un error", null, errors, 400);
+            }
+
+            var clientToUpdate = ClientMapper.ToDomain(request);
+            clientToUpdate.Id = existingClient.Id;
+
+            var updatedClient = await _service.Update(clientToUpdate);
+            var response = ClientMapper.ToResponse(updatedClient);
+
+            return Ok(new StandardResponse<ClientApiResponse>(true, "Cliente actualizado exitosamente", response));
+
+        }
+
+
         // delete -> delete client
 
     }
