@@ -162,6 +162,9 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
                 .HasIndex(c => c.Dni)
                 .IsUnique();
 
+            modelBuilder.Entity<ClientEntity>()
+                .HasQueryFilter(c => !c.IsDeleted); // Filtro global para soft delete
+
         }
 
     }
