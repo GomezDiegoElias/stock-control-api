@@ -10,5 +10,6 @@ namespace org.pos.software.Application.InPort
         public Task<Client> Save(Client client);
         public Task<Client> Update(Client client);
         public Task<Client> Delete(long id);
+        public Task<Client> DeleteLogic(long dni);
     }
 }
