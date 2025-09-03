@@ -26,10 +26,10 @@ namespace org.pos.software.Application.Services
             return await _repository.FindByDni(dni);
         }
 
-        public Task<Client> Save(Client client)
+        public async Task<Client> Save(Client client)
         {
             if (string.IsNullOrEmpty(client.Id)) client.Id = Client.GenerateId();
-            return _repository.Save(client);
+            return await _repository.Save(client);
         }
 
         public async Task<Client> Update(Client client)
@@ -42,5 +42,9 @@ namespace org.pos.software.Application.Services
             return await _repository.Delete(id);
         }
 
+        public async Task<Client> DeleteLogic(long dni)
+        {
+            return await _repository.DeleteLogic(dni);
+        }
     }
 }
