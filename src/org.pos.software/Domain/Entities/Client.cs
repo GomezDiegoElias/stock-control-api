@@ -7,6 +7,7 @@
         public long Dni { get; set; }
         public string FirstName { get; set; }
         public string Address { get; set; }
+        public bool IsDeleted { get; set; } = false;
 
         public Client() { }
 
