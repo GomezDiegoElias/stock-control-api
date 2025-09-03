@@ -62,7 +62,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
                 Items = users,
                 PageIndex = pageIndex,
                 PageSize = pageSize,
-                TotalCount = totalItems,
+                TotalItems = totalItems,
                 TotalPages = totalPages
             };
         }
@@ -107,7 +107,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
                 Items = clients,
                 PageIndex = pageIndex,
                 PageSize = pageSize,
-                TotalCount = totalItems,
+                TotalItems = totalItems,
                 TotalPages = totalPages
             };
         }
