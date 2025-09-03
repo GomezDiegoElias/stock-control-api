@@ -1,5 +1,7 @@
-﻿using org.pos.software.Application.InPort;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using org.pos.software.Application.InPort;
 using org.pos.software.Domain.Entities;
+using org.pos.software.Domain.Exceptions;
 using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 
@@ -46,5 +48,18 @@ namespace org.pos.software.Application.Services
         {
             return await _repository.DeleteLogic(dni);
         }
+
+        public async Task<Client> UpdatePartial(long dni, JsonPatchDocument<Client> patchDoc)
+        {
+            
+            var existingClient = await _repository.FindByDni(dni);
+            if (existingClient == null) throw new ClientNotFoundException($"Client with DNI {dni} not found.");
+
+            patchDoc.ApplyTo(existingClient);
+
+            return await _repository.UpdatePartial(existingClient);
+
+        }
+
     }
 }
