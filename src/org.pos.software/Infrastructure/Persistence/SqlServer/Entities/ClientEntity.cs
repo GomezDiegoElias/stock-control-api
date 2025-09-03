@@ -27,6 +27,10 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Entities
         public string Address { get; set; }
 
         [Required]
+        [Column("is_deleted")]
+        public bool IsDeleted { get; set; } = false;
+
+        [Required]
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") != null ? DateTime.Now : DateTime.MinValue;
 
@@ -42,6 +46,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Entities
             Dni = dni;
             FirstName = firstname;
             Address = address;
+            IsDeleted = false;
         }
 
     }
