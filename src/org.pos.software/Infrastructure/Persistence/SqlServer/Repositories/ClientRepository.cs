@@ -31,6 +31,19 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
 
         }
 
+        public async Task<Client> DeleteLogic(long dni)
+        {
+            
+            var entity = await _context.Clients.FirstOrDefaultAsync(x => x.Dni == dni);
+            if (entity == null) throw new ClientNotFoundException($"No se encontró cliente con DNI {dni}");
+
+            entity.IsDeleted = true;
+            await _context.SaveChangesAsync();
+
+            return ClientMapper.ToDomain(entity);
+
+        }
+
         public async Task<PaginatedResponse<Client>> FindAll(int pageIndex, int pageSize)
         {
             return await _context.getClientPagination(pageIndex, pageSize);
