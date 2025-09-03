@@ -128,6 +128,21 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
 
 
         // delete -> delete client
+        [AllowAnonymous]
+        [HttpDelete("{dni:long}")]
+        public async Task<ActionResult<StandardResponse<ClientApiResponse>>> DeleteClient(long dni)
+        {
+
+            var existingClient = await _service.FindByDni(dni);
+
+            if (existingClient == null) throw new ClientNotFoundException(dni.ToString());
+
+            var deletedClient = await _service.Delete(dni);
+            var response = ClientMapper.ToResponse(deletedClient);
+
+            return Ok(new StandardResponse<ClientApiResponse>(true, "Cliente eliminado exitosamente", response));
+
+        }
 
     }
 }
