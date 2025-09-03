@@ -11,5 +11,6 @@ namespace org.pos.software.Domain.OutPort
         public Task<Client> Update(Client client);
         public Task<Client> Delete(long dni);
         public Task<Client> DeleteLogic(long dni);
+        public Task<Client> UpdatePartial(Client client);
     }
 }
