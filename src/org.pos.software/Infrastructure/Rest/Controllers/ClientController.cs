@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using org.pos.software.Application.InPort;
 using org.pos.software.Domain.Exceptions;
@@ -35,7 +34,25 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             [FromQuery] int pageSize = 5
         )
         {
-            return null;
+
+            var clients = await _service.FindAll(pageIndex, pageSize);
+            var clientResponse = clients.Items.Select(c => ClientMapper.ToResponse(c)).ToList();
+
+            var paginatedResponse = new PaginatedResponse<ClientApiResponse>
+            {
+                Items = clientResponse,
+                PageIndex = clients.PageIndex,
+                PageSize = clients.PageSize,
+                TotalCount = clients.TotalCount,
+                TotalPages = clients.TotalPages
+            };
+
+            return Ok(new StandardResponse<PaginatedResponse<ClientApiResponse>>(
+                Success: true,
+                Message: "Clientes obtenidos exitosamente",
+                Data: paginatedResponse
+            ));
+
         }
 
         [AllowAnonymous]
