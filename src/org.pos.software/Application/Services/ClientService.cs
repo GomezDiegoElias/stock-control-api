@@ -1,6 +1,7 @@
 ﻿using org.pos.software.Application.InPort;
 using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.OutPort;
+using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 
 namespace org.pos.software.Application.Services
 {
@@ -15,14 +16,9 @@ namespace org.pos.software.Application.Services
             _repository = repository;
         }
 
-        public Task<Client> Delete(long id)
+        public Task<PaginatedResponse<Client>> FindAll(int pageIndex, int pageSize)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<Client> FindAll(int pageIndex, int pageSize)
-        {
-            throw new NotImplementedException();
+            return _repository.FindAll(pageIndex, pageSize);
         }
 
         public async Task<Client?> FindByDni(long dni)
@@ -37,6 +33,11 @@ namespace org.pos.software.Application.Services
         }
 
         public Task<Client> Update(Client client)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Client> Delete(long id)
         {
             throw new NotImplementedException();
         }
