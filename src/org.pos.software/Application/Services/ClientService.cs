@@ -39,9 +39,9 @@ namespace org.pos.software.Application.Services
             return await _repository.Update(client);
         }
 
-        public async Task<Client> Delete(long id)
+        public async Task<Client> DeletePermanent(long id)
         {
-            return await _repository.Delete(id);
+            return await _repository.DeletePermanent(id);
         }
 
         public async Task<Client> DeleteLogic(long dni)
