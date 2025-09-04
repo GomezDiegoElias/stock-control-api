@@ -37,7 +37,9 @@ namespace org.pos.software.Application.Services
 
         public async Task<User?> FindByDni(long dni)
         {
-            return await _userRepository.FindByDni(dni);
+            var user = await _userRepository.FindByDni(dni)
+                ?? throw new UserNotFoundException($"Usuario con DNI {dni} no existe");
+            return user;
         }
 
         public async Task<User> SaveCustomUser(UserApiRequest request)
