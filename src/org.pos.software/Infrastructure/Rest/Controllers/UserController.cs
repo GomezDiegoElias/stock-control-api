@@ -1,6 +1,8 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using org.pos.software.Application.Ports;
 using org.pos.software.Domain.Exceptions;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
@@ -158,6 +160,56 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             userToUpdate.Id = existingUser.Id; // Mantener el mismo Id
 
             var updatedUser = await _userService.Update(userToUpdate);
+            var response = UserMapper.ToResponse(updatedUser);
+
+            return Ok(new StandardResponse<UserApiResponse>(
+                Success: true,
+                Message: "Usuario actualizado exitosamente",
+                Data: response
+            ));
+
+        }
+
+        [AllowAnonymous]
+        [HttpPatch("{dni:long}")]
+        public async Task<ActionResult<StandardResponse<UserApiResponse>>> PartiallyUpdateUser(
+            long dni,
+            [FromBody] JsonPatchDocument<UserApiRequest> patchDoc
+        )
+        {
+           
+            if (patchDoc == null)
+            {
+                var errors = new ErrorDetails(400, "Documento de parcheo nulo", HttpContext.Request.Path, "El documento de parcheo no puede ser nulo.");
+                return BadRequest(new StandardResponse<UserApiResponse>(false, "Ah ocurrido un error", null, errors));
+            }
+
+            var existingUser = await _userService.FindByDni(dni)
+                ?? throw new UserNotFoundException($"Usuario con DNI {dni} no existe");
+
+            var userToPatch = UserMapper.ToRequest(existingUser);
+
+            var modelState = new ModelStateDictionary();
+            patchDoc.ApplyTo(userToPatch, modelState);
+            if (!modelState.IsValid)
+            {
+                var errors = string.Join("; ", modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                var errorDetails = new ErrorDetails(400, "Error de validacion", HttpContext.Request.Path, errors);
+                return BadRequest(new StandardResponse<UserApiResponse>(false, "Ah ocurrido un error", null, errorDetails));
+            }
+
+            var validationResult = await _userValidator.ValidateAsync(userToPatch);
+            if (!validationResult.IsValid)
+            {
+                var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+                var errors = new ErrorDetails(400, "Validacion fallida", HttpContext.Request.Path, validationErrors);
+                return BadRequest(new StandardResponse<UserApiResponse>(false, "Ah ocurrido un error", null, errors));
+            }
+
+            var userDomain = UserMapper.ToDomain(userToPatch);
+            userDomain.Id = existingUser.Id; // Mantener el mismo Id
+
+            var updatedUser = await _userService.Update(userDomain);
             var response = UserMapper.ToResponse(updatedUser);
 
             return Ok(new StandardResponse<UserApiResponse>(
