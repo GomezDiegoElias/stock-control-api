@@ -10,5 +10,6 @@ namespace org.pos.software.Application.Ports
         public Task<User?> FindByDni(long dni);
         public Task<User> SaveCustomUser(UserApiRequest request);
         public Task<User> DeletePermanent(long dni);
+        public Task<User> DeleteLogic(long dni);
     }
 }
