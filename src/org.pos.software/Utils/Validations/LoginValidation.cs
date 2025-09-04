@@ -8,11 +8,11 @@ namespace org.pos.software.Utils.Validations
         public LoginValidation()
         {
             RuleFor(x => x.Email)
-                .NotEmpty().WithMessage("Email is required.")
-                .EmailAddress().WithMessage("Invalid email format.");
+                .NotEmpty().WithMessage("El correo electronico es obligatorio.")
+                .EmailAddress().WithMessage("Formato invalido de correo electronico.");
             RuleFor(x => x.Password)
-                .NotEmpty().WithMessage("Password is required.")
-                .MinimumLength(6).WithMessage("Password must be at least 6 characters long.");
+                .NotEmpty().WithMessage("La contraseña es obligatoria.")
+                .MinimumLength(6).WithMessage("La contraseña debe tener al menos 6 caracteres.");
         }
     }
 }

@@ -8,14 +8,14 @@ namespace org.pos.software.Utils.Validations
         public ClientValidation()
         {
             RuleFor(x => x.Dni)
-                .NotEmpty().WithMessage("Dni is required")
+                .NotEmpty().WithMessage("El DNI es obligatorio")
                 .InclusiveBetween(10_000_000, 99_999_999)
-                .WithMessage("Dni must be exactly 8 digits");
+                .WithMessage("El DNI debe tener exactamente 8 dígitos");
             RuleFor(x => x.FirstName)
-                .NotEmpty().WithMessage("First name is required")
-                .MaximumLength(50).WithMessage("First name cannot exceed 50 characters");
+                .NotEmpty().WithMessage("El nombre es obligatorio")
+                .MaximumLength(50).WithMessage("El nombre no puede exceder los 50 caracteres");
             RuleFor(x => x.Address)
-                .MaximumLength(100).WithMessage("Address cannot exceed 100 characters");
+                .MaximumLength(100).WithMessage("La dirección no puede exceder los 100 caracteres");
         }
     }
 }

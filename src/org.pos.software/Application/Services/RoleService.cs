@@ -27,6 +27,10 @@ namespace org.pos.software.Application.Services
             return await _roleRepository.Save(role);
         }
 
+        public Task<Role> UpdateRolePermissions(string roleName, IEnumerable<string> addPermissions, IEnumerable<string> removePermissions)
+        {
+            return _roleRepository.UpdatePermissions(roleName, addPermissions, removePermissions);
+        }
     }
 
 }

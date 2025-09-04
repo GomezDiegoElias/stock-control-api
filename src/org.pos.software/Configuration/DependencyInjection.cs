@@ -67,6 +67,27 @@ public static class DependencyInjection
             });
         });
 
+        services.AddAuthorization(options =>
+        {
+
+            var entities = new[] { "User", "Client" };
+            var actions = new[] { "CREATE", "READ", "UPDATE", "DELETE" };
+
+            foreach (var entity in entities)
+            {
+                foreach (var action in actions)
+                {
+
+                    var permission = $"{action}_{entity}".ToUpper(); // ej: CREATE_CLIENT
+                    var policyName = $"Can{action}_{entity}"; // ej: CanCREATE_Client
+                
+                    options.AddPolicy(policyName, policy => policy.RequireClaim("permission", permission) );
+
+                }
+            }
+
+        });
+
         // validadores
         services.AddValidatorsFromAssemblyContaining<LoginValidation>();
         services.AddValidatorsFromAssemblyContaining<RegisterValidation>();
@@ -77,17 +98,5 @@ public static class DependencyInjection
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IClientService, ClientService>();
 
-        // politicas / restricciones
-        services.AddAuthorization(options =>
-        {
-            options.AddPolicy("CanCreate", policy => policy.RequireClaim("permission", "CREATE"));
-            options.AddPolicy("CanRead", policy => policy.RequireClaim("permission", "READ"));
-            options.AddPolicy("CanUpdate", policy => policy.RequireClaim("permission", "UPDATE"));
-            options.AddPolicy("CanDelete", policy => policy.RequireClaim("permission", "DELETE"));
-            // + politicas
-        });
-
-        // Registrar otros servicios de aplicación aquí
-    
     }
 }

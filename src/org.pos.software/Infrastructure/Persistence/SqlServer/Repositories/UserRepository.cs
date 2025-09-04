@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using org.pos.software.Domain.Entities;
+using org.pos.software.Domain.Exceptions;
 using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
 using org.pos.software.Infrastructure.Rest.Dto.Response.General;
@@ -56,7 +57,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
                 .FirstOrDefaultAsync(r => r.Name == user.Role.Name);
 
             if (roleEntity == null)
-                throw new ApplicationException($"Role {user.Role.Name} does not exist");
+                throw new RoleNotFoundException(user.Role.Name);
 
             var entity = UserMapper.toEntity(user, roleEntity);
             _context.Users.Add(entity);

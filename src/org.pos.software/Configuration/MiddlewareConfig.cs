@@ -33,6 +33,7 @@ public static class MiddlewareConfig
                         // Excepciones personalizas
                         UserNotFoundException => 404,
                         ClientNotFoundException => 404,
+                        RoleNotFoundException => 404,
                         _ => 500 // Internal Server
                     };
 

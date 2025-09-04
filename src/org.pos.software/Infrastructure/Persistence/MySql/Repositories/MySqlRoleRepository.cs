@@ -33,5 +33,9 @@ namespace org.pos.software.Infrastructure.Persistence.MySql.Repositories
             return MysSqlRoleMapper.ToDomain(entity);
         }
 
+        public Task<Role> UpdatePermissions(string roleName, IEnumerable<string> addPermissions, IEnumerable<string> removePermissions)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
