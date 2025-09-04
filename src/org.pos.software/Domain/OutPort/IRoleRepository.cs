@@ -1,5 +1,4 @@
 ﻿using org.pos.software.Domain.Entities;
-using org.pos.software.Infrastructure.Persistence.MySql.Entities;
 
 namespace org.pos.software.Domain.OutPort
 {

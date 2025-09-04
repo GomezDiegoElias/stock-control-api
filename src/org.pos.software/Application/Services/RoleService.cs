@@ -1,8 +1,6 @@
 ﻿using org.pos.software.Application.InPort;
 using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.OutPort;
-using org.pos.software.Infrastructure.Persistence.MySql.Entities;
-using org.pos.software.Infrastructure.Persistence.MySql.Mappers;
 
 namespace org.pos.software.Application.Services
 {

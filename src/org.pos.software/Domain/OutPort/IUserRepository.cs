@@ -1,5 +1,4 @@
 ﻿using org.pos.software.Domain.Entities;
-using org.pos.software.Infrastructure.Persistence.MySql.Entities;
 using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 
 namespace org.pos.software.Domain.OutPort

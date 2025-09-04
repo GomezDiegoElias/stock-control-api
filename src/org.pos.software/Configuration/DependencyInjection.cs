@@ -4,9 +4,7 @@ using org.pos.software.Application.InPort;
 using org.pos.software.Application.Ports;
 using org.pos.software.Application.Services;
 using org.pos.software.Domain.OutPort;
-using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
-using org.pos.software.Infrastructure.Persistence.Supabase.Repositories;
 using org.pos.software.Utils.Validations;
 
 namespace org.pos.software.Configuration;
@@ -39,15 +37,6 @@ public static class DependencyInjection
                 services.AddScoped<IUserRepository, UserRepository>();
                 services.AddScoped<IRoleRepository, RoleRepository>();
                 services.AddScoped<IClientRepository, ClientRepository>();
-                break;
-            case "supabase":
-                DatabaseConfig.ConfigureSupabase(services, connectionString);
-                services.AddScoped<SupabaseUserRepository>();
-                break;
-            case "mysql":
-                DatabaseConfig.ConfigureMySql(services, connectionString);
-                services.AddScoped<IUserRepository, MySqlUserRepository>();
-                services.AddScoped<IRoleRepository, MySqlRoleRepository>();
                 break;
             default:
                 throw new InvalidOperationException($"Proveedor de base de datos no soportado: {dbProvider}");

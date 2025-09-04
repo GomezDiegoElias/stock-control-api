@@ -2,9 +2,6 @@
 using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.Exceptions;
 using org.pos.software.Domain.OutPort;
-using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
-using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
-using org.pos.software.Infrastructure.Persistence.Supabase.Repositories;
 using org.pos.software.Infrastructure.Rest.Dto.Request;
 using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 using org.pos.software.Utils;
