@@ -1,13 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using org.pos.software.Application.Ports;
-using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.Exceptions;
-
-//using org.pos.software.Infrastructure.Persistence.MySql.Entities;
-using org.pos.software.Infrastructure.Persistence.MySql.Mappers;
-//using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
-// using org.pos.software.Infrastructure.Persistence.Supabase.Mappers;
+using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
 using org.pos.software.Infrastructure.Rest.Dto.Request;
 using org.pos.software.Infrastructure.Rest.Dto.Response;
 using org.pos.software.Infrastructure.Rest.Dto.Response.General;
@@ -21,11 +17,13 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
     public class UserController : Controller
     {
 
-        private readonly IUserService userService;
+        private readonly IUserService _userService;
+        private readonly IValidator<UserApiRequest> _userValidator;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IValidator<UserApiRequest> userValidator)
         {
-            this.userService = userService;
+            _userService = userService;
+            _userValidator = userValidator;
         }
 
         // falta paginacion, filtros, etc
@@ -43,9 +41,9 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
         )
         {
 
-            var users = await userService.FindAllUsers(pageIndex, pageSize);
+            var users = await _userService.FindAllUsers(pageIndex, pageSize);
 
-            var userResponse = users.Items.Select(user => MySqlUserMapper.ToResponse(user)).ToList();
+            var userResponse = users.Items.Select(user => UserMapper.ToResponse(user)).ToList();
 
             var paginatedResponse = new PaginatedResponse<UserApiResponse>
             {
@@ -76,11 +74,37 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
         public async Task<ActionResult<StandardResponse<UserApiResponse>>> GetUserByDni(long dni)
         {
 
-            var user = await userService.FindByDni(dni);
+            var user = await _userService.FindByDni(dni);
             if (user == null) throw new UserNotFoundException(dni.ToString());
 
-            var response = MySqlUserMapper.ToResponse(user);
+            var response = UserMapper.ToResponse(user);
             return Ok(new StandardResponse<UserApiResponse>(true, "Usuario obtenido exitosamente", response));
+
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<ActionResult<StandardResponse<UserApiResponse>>> CreateUser([FromBody] UserApiRequest request)
+        {
+
+            var validationResult = await _userValidator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+                var errors = new ErrorDetails(400, "Validacion fallida", HttpContext.Request.Path, validationErrors);
+                return new StandardResponse<UserApiResponse>(false, "Ah ocurrido un error", null, errors);
+            }
+
+            var newUser = await _userService.SaveCustomUser(request);
+
+            var response = new StandardResponse<UserApiResponse>(
+                Success: true,
+                Message: "Usuario creado exitosamente",
+                Data: UserMapper.ToResponse(newUser)
+            );
+
+            return Created(string.Empty, response);
 
         }
 
