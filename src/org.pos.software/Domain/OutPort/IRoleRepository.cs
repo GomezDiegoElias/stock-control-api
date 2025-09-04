@@ -7,5 +7,6 @@ namespace org.pos.software.Domain.OutPort
         public Task<Role?> FindByName(string name);
         public Task<Role> Save(Role role);
         public Task<Role> UpdatePermissions(string roleName, IEnumerable<string> addPermissions, IEnumerable<string> removePermissions);
+        public Task<List<Role>> FindAll(bool includePermissions = false);
     }
 }
