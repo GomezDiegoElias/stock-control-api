@@ -12,5 +12,6 @@ namespace org.pos.software.Domain.OutPort
         public Task<User> DeletePermanent(long dni);
         public Task<User> DeleteLogic(long dni);
         public Task<User> Update(User user);
+        public Task<User> UpdatePartial(User user);
     }
 }
