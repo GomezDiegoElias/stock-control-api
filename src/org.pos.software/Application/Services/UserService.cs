@@ -20,14 +20,19 @@ namespace org.pos.software.Application.Services
             _roleRepository = roleRepository;
         }
 
+        public async Task<User> DeletePermanent(long dni)
+        {
+            return await _userRepository.DeletePermanent(dni);
+        }
+
         public async Task<PaginatedResponse<User>> FindAllUsers(int pageIndex, int pageSize)
         {
             return await _userRepository.FindAll(pageIndex, pageSize);
         }
 
-        public Task<User?> FindByDni(long dni)
+        public async Task<User?> FindByDni(long dni)
         {
-            return _userRepository.FindByDni(dni);
+            return await _userRepository.FindByDni(dni);
         }
 
         public async Task<User> SaveCustomUser(UserApiRequest request)
