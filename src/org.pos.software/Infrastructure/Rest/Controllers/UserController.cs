@@ -109,13 +109,26 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
         }
 
         [AllowAnonymous]
-        [HttpDelete("{dni:long}")]
+        [HttpDelete("permanent/{dni:long}")]
         public async Task<ActionResult<StandardResponse<UserApiResponse>>> DeleteUserPermanently(long dni)
         {
             var deletedUser = await _userService.DeletePermanent(dni);
             var response = new StandardResponse<UserApiResponse>(
                 Success: true,
                 Message: "Usuario eliminado permanentemente",
+                Data: UserMapper.ToResponse(deletedUser)
+            );
+            return Ok(response);
+        }
+
+        [AllowAnonymous]
+        [HttpDelete("{dni:long}")]
+        public async Task<ActionResult<StandardResponse<UserApiResponse>>> DeleteUserLogically(long dni)
+        {
+            var deletedUser = await _userService.DeleteLogic(dni);
+            var response = new StandardResponse<UserApiResponse>(
+                Success: true,
+                Message: "Usuario eliminado",
                 Data: UserMapper.ToResponse(deletedUser)
             );
             return Ok(response);
