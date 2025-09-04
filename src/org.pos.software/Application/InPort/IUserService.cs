@@ -1,4 +1,5 @@
 ﻿using org.pos.software.Domain.Entities;
+using org.pos.software.Infrastructure.Rest.Dto.Request;
 using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 
 namespace org.pos.software.Application.Ports
@@ -7,5 +8,6 @@ namespace org.pos.software.Application.Ports
     {
         public Task<PaginatedResponse<User>> FindAllUsers(int pageIndex, int pageSize);
         public Task<User?> FindByDni(long dni);
+        public Task<User> SaveCustomUser(UserApiRequest request);
     }
 }
