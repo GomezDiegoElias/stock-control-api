@@ -6,6 +6,7 @@ namespace org.pos.software.Application.InPort
     {
         Task<Role> GetRoleByName(string name);
         Task<Role> CreateRole(Role role);
+        Task<Role> UpdateRolePermissions(string roleName, IEnumerable<string> addPermissions, IEnumerable<string> removePermissions);
     }
 
 }
