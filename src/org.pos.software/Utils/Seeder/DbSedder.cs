@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using org.pos.software.Domain.Entities;
+using org.pos.software.Domain.Exceptions;
 using org.pos.software.Infrastructure.Persistence.SqlServer;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Entities;
 
@@ -10,41 +11,65 @@ namespace org.pos.software.Utils.Seeder
 
         public static async Task SeedRolesAndPermissions(AppDbContext context)
         {
-
             if (!context.Roles.Any())
             {
+                var entities = new[] { "User", "Client" };
+                var actions = new[] { "CREATE", "READ", "UPDATE", "DELETE" };
 
-                // Crear permisos
-                var permRead = new PermissionEntity { Name = "READ" };
-                var permCreate = new PermissionEntity { Name = "CREATE" };
-                context.Permissions.Add(permRead);
+                var permissionsDict = new Dictionary<string, PermissionEntity>();
 
-                // Crear roles
-                var presupuestista = new RoleEntity
+                // Crear permisos y almacena en un diccionario para acceso rápido
+                // Crea todos los permisos posibles
+                foreach (var entity in entities)
                 {
-                    Name = "PRESUPUESTISTA",
-                    RolePermissions = new List<RolePermissionEntity>
+                    foreach (var action in actions)
                     {
-                        new RolePermissionEntity { Permission = permRead }
+                        var permName = $"{action}_{entity}".ToUpper(); // Ej: CREATE_CLIENT
+                        var perm = new PermissionEntity { Name = permName };
+                        context.Permissions.Add(perm); // Agrega a la base de datos
+                        permissionsDict[permName] = perm;
                     }
-                };
+                }
 
+                // Crear roles y asignar permisos
                 var admin = new RoleEntity
                 {
                     Name = "ADMIN",
-                    RolePermissions = new List<RolePermissionEntity>
-                    {
-                        new RolePermissionEntity { Permission = permRead },
-                        new RolePermissionEntity { Permission = permCreate }
-                    }
+                    RolePermissions = new List<RolePermissionEntity>()
                 };
 
-                context.Roles.AddRange(presupuestista, admin);
+                // Permisos para ADMIN (todos los permisos)
+                foreach (var perm in permissionsDict.Values)
+                {
+                    admin.RolePermissions.Add(new RolePermissionEntity
+                    {
+                        Role = admin,          // FK con RoleEntity
+                        Permission = perm      // FK con PermissionEntity
+                    });
+                }
 
+                var presupuestista = new RoleEntity
+                {
+                    Name = "PRESUPUESTISTA",
+                    RolePermissions = new List<RolePermissionEntity>()
+                };
+
+                // Permisos específicos para PRESUPUESTISTA
+                var permisosPresupuestista = new[] { "READ_CLIENT", "CREATE_CLIENT",};
+                foreach (var permName in permisosPresupuestista)
+                {
+                    presupuestista.RolePermissions.Add(new RolePermissionEntity
+                    {
+                        Role = presupuestista,
+                        Permission = permissionsDict[permName]
+                    });
+                }
+
+                context.Roles.AddRange(admin, presupuestista);
                 await context.SaveChangesAsync();
             }
-
         }
+
 
         public static async Task SeedUserWhitDiferentRoles(AppDbContext context)
         {
@@ -54,11 +79,11 @@ namespace org.pos.software.Utils.Seeder
 
                 var rolePresupuestista = await context.Roles.FirstOrDefaultAsync(x => x.Name == "PRESUPUESTISTA");
                 if (rolePresupuestista == null)
-                    throw new ApplicationException("Role PRESUPUESTISTA does not exist");
+                    throw new RoleNotFoundException("PRESUPUESTISTA");
 
                 var roleAdmin = await context.Roles.FirstOrDefaultAsync(x => x.Name == "ADMIN");
                 if (roleAdmin == null)
-                    throw new ApplicationException("Role ADMIN does not exist");
+                    throw new RoleNotFoundException("ADMIN");
 
                 // ---- USUARIO 1 ----
                 string passwordDiego = "123456";
