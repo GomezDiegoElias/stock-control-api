@@ -17,6 +17,26 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
             _context = context;
         }
 
+        public async Task<User> DeleteLogic(long dni)
+        {
+            
+            var user = await _context.Users
+                .Include(u => u.Role)
+                .ThenInclude(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
+                .FirstOrDefaultAsync(u => u.Dni == dni);
+
+            if (user == null) throw new UserNotFoundException($"Usuario con DNI {dni} no existe");
+
+            user.Status = Status.DELETED; // Cambio de estado a DELETED
+
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return UserMapper.ToDomain(user);
+
+        }
+
         public async Task<User> DeletePermanent(long dni)
         {
            
