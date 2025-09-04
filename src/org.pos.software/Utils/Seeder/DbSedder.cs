@@ -194,8 +194,9 @@ namespace org.pos.software.Utils.Seeder
                         u.Status,
                         ROW_NUMBER() OVER(ORDER BY u.id ASC) AS Fila,
                         COUNT(*) OVER() AS TotalFilas
-                    FROM tbl_user u
+                    FROM tbl_user u 
                     JOIN tbl_role r on u.role_id = r.id
+                    WHERE u.Status != 'DELETED'
                     ORDER BY u.id ASC
                     OFFSET @Offset ROWS
                     FETCH NEXT @PageSize ROWS ONLY
