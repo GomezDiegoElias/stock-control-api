@@ -9,5 +9,6 @@ namespace org.pos.software.Application.Ports
         public Task<PaginatedResponse<User>> FindAllUsers(int pageIndex, int pageSize);
         public Task<User?> FindByDni(long dni);
         public Task<User> SaveCustomUser(UserApiRequest request);
+        public Task<User> DeletePermanent(long dni);
     }
 }
