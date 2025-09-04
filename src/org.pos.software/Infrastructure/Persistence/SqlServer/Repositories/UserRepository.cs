@@ -105,5 +105,38 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
 
         }
 
+        public async Task<User> Update(User user)
+        {
+            
+            var existingUser = await _context.Users
+                .Include(u => u.Role)
+                .ThenInclude(r => r.RolePermissions)
+                .ThenInclude(rp => rp.Permission)
+                .FirstOrDefaultAsync(u => u.Dni == user.Dni);
+
+            if (existingUser == null) throw new UserNotFoundException($"Usuario con DNI {user.Dni} no existe");
+
+            // Actualiza los campos del usuario existente
+            existingUser.Dni = user.Dni;
+            existingUser.Email = user.Email;
+            existingUser.Hash = user.Hash;
+            existingUser.Salt = user.Salt;
+            existingUser.FirstName = user.FirstName;
+            existingUser.LastName = user.LastName;
+            existingUser.Status = user.Status;
+
+            // Buscar el RoleEntity correspondiente
+            var roleEntity = await _context.Roles
+                .FirstOrDefaultAsync(r => r.Name == user.Role.Name);
+
+            if (roleEntity == null) throw new RoleNotFoundException(user.Role.Name);
+
+            existingUser.RoleId = roleEntity.Id;
+
+            await _context.SaveChangesAsync();
+
+            return UserMapper.ToDomain(existingUser);
+
+        }
     }
 }
