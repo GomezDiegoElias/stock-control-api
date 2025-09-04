@@ -11,5 +11,6 @@ namespace org.pos.software.Domain.OutPort
         public Task<User?> FindByEmail(string email);
         public Task<User> DeletePermanent(long dni);
         public Task<User> DeleteLogic(long dni);
+        public Task<User> Update(User user);
     }
 }
