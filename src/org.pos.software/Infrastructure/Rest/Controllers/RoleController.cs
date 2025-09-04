@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using org.pos.software.Application.InPort;
+using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
 using org.pos.software.Infrastructure.Rest.Dto.Request;
+using org.pos.software.Infrastructure.Rest.Dto.Response;
+using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 
 namespace org.pos.software.Infrastructure.Rest.Controllers
 {
@@ -41,6 +44,29 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             });
 
         }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<ActionResult<StandardResponse<object>>> GetRoles([FromQuery] bool includePermissions = false)
+        {
+            
+            var roles = await _roleService.GetAllRoles(includePermissions);
+
+            // Mapea los roles a respuestas DTO
+            var data = roles
+                .Select(r => RoleMapper.ToResponse(r, includePermissions))
+                .ToList();
+
+            return Ok(new StandardResponse<object>(
+                true,
+                includePermissions ? "Roles con permisos" : "Roles (solo nombres)",
+                data,
+                null,
+                200
+            ));
+
+        }
+
 
     }
 
