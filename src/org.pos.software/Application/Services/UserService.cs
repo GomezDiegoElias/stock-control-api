@@ -2,6 +2,7 @@
 using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.Exceptions;
 using org.pos.software.Domain.OutPort;
+using org.pos.software.Infrastructure.Persistence.SqlServer.Mappers;
 using org.pos.software.Infrastructure.Rest.Dto.Request;
 using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 using org.pos.software.Utils;
@@ -58,13 +59,19 @@ namespace org.pos.software.Application.Services
             if (roleEntity == null)
                 throw new RoleNotFoundException(request.Role);
 
+            // Parsear el string a Status (con fallbacl si no es valido)
+            if (!Enum.TryParse<Status>(request.Status, true, out var status))
+            {
+                throw new ApplicationException($"Estado '{request.Status}' no es valido. Valores permitidos: ACTIVE, INACTIVE, DELETED.");
+            }
+
             var userCustom = User.Builder()
                 .Dni(request.Dni)
                 .Email(request.Email)
                 .FirstName(request.FirstName)
                 .LastName(request.LastName)
                 .Role(roleEntity)
-                .Status(Status.ACTIVE)
+                .Status(status)
                 .Hash(hashedPassword)
                 .Salt(salt)
                 .Build();
@@ -77,5 +84,9 @@ namespace org.pos.software.Application.Services
 
         }
 
+        public async Task<User> Update(User user)
+        {
+            return await _userRepository.Update(user);
+        }
     }
 }
