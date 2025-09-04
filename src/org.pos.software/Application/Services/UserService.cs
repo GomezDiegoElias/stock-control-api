@@ -1,4 +1,5 @@
-﻿using org.pos.software.Application.Ports;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using org.pos.software.Application.Ports;
 using org.pos.software.Domain.Entities;
 using org.pos.software.Domain.Exceptions;
 using org.pos.software.Domain.OutPort;
@@ -87,6 +88,18 @@ namespace org.pos.software.Application.Services
         public async Task<User> Update(User user)
         {
             return await _userRepository.Update(user);
+        }
+
+        public async Task<User> UpdatePartial(long dni, JsonPatchDocument<User> patchDoc)
+        {
+            
+            var existingUser = await _userRepository.FindByDni(dni)
+                ?? throw new UserNotFoundException($"Usuario con DNI {dni} no existe");
+
+            patchDoc.ApplyTo(existingUser);
+
+            return await _userRepository.UpdatePartial(existingUser);
+
         }
     }
 }
