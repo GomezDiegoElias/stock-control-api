@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using org.pos.software.Application.InPort;
 using org.pos.software.Configuration;
 using org.pos.software.Domain.Entities;
+using org.pos.software.Domain.Exceptions;
 using org.pos.software.Domain.OutPort;
 using org.pos.software.Infrastructure.Persistence.MySql.Repositories;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Repositories;
@@ -34,11 +35,11 @@ namespace org.pos.software.Application.Services
             // Verificaciones
             var user = await _userRepository.FindByEmail(request.Email);
 
-            if (user == null) throw new UnauthorizedAccessException("Invalid credentials");
+            if (user == null) throw new UnauthorizedAccessException("Credenciales invalidas");
 
             bool passwordValid = PasswordUtils.VerifyPassword(request.Password, user.Hash, user.Salt);
 
-            if (!passwordValid) throw new UnauthorizedAccessException("Invalid credentials");
+            if (!passwordValid) throw new UnauthorizedAccessException("Credenciales invalidas");
 
             // Generacion del token
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -86,10 +87,10 @@ namespace org.pos.software.Application.Services
 
             // varificaciones por email y dni
             if (await _userRepository.FindByEmail(request.Email) != null) 
-                throw new ApplicationException("Email already exists");
+                throw new UserNotFoundException($"Error: Correo electronico '{request.Email}' ya existe");
 
             if (await _userRepository.FindByDni(request.Dni) != null) 
-                throw new ApplicationException("DNI already exists");
+                throw new UserNotFoundException($"Error: Numero de DNI '{request.Dni}' ya existe");
 
             string salt = PasswordUtils.GenerateRandomSalt();
             string hashedPassword = PasswordUtils.HashPasswordWithSalt(request.Password, salt);
@@ -99,7 +100,7 @@ namespace org.pos.software.Application.Services
             // Busca si existe el rol
             var roleEntity = await _roleRepository.FindByName("PRESUPUESTISTA");
             if (roleEntity == null)
-                throw new ApplicationException("Role PRESUPUESTISTA does not exist");
+                throw new RoleNotFoundException("Rol PRESUPUESTISTA no existe");
 
             var newUser = User.Builder()
                 .Dni(request.Dni)
