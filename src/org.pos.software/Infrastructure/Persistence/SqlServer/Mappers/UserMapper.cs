@@ -1,6 +1,8 @@
 ﻿using org.pos.software.Domain.Entities;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Entities;
+using org.pos.software.Infrastructure.Rest.Dto.Request;
 using org.pos.software.Infrastructure.Rest.Dto.Response;
+using org.pos.software.Utils;
 
 namespace org.pos.software.Infrastructure.Persistence.SqlServer.Mappers
 {
@@ -52,6 +54,33 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Mappers
                     domain.Role.Name ?? string.Empty,
                     domain.Status.ToString()
                 );
+        }
+
+        // Convierte un UserApiRequest a un User de dominio, generando el hash y la sal de la contraseña
+        // Usado en la actualizacion de usuarios
+        public static User ToDomain(UserApiRequest request)
+        {
+
+            // Genera la sal y el hash de la contraseña
+            var salt = PasswordUtils.GenerateRandomSalt();
+            var hash = PasswordUtils.HashPasswordWithSalt(request.Password, salt);
+
+            // Parsear el string a Status (con fallbacl si no es valido)
+            if (!Enum.TryParse<Status>(request.Status, true, out var status))
+            {
+                throw new ApplicationException($"Estado '{request.Status}' no es valido. Valores permitidos: ACTIVE, INACTIVE, DELETED.");
+            }
+
+            return User.Builder()
+                .Dni(request.Dni)
+                .Email(request.Email)
+                .Salt(salt)
+                .Hash(hash)
+                .FirstName(request.FirstName)
+                .LastName(request.LastName)
+                .Role(new Role(request.Role, Enumerable.Empty<string>()))
+                .Status(status)
+                .Build();
         }
 
     }
