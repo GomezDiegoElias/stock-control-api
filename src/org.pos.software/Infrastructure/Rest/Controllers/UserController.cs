@@ -134,6 +134,40 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
             return Ok(response);
         }
 
+        [AllowAnonymous]
+        [HttpPut("{dni:long}")]
+        public async Task<ActionResult<StandardResponse<UserApiResponse>>> UpdateUser(
+            [FromBody] UserApiRequest request, 
+            long dni
+        )
+        {
+
+            var existingUser = await _userService.FindByDni(dni);
+            if (existingUser == null) throw new UserNotFoundException(dni.ToString());
+
+            // Validar el request
+            var validationResult = await _userValidator.ValidateAsync(request);
+            if (!validationResult.IsValid)
+            {
+                var validationErrors = string.Join("; ", validationResult.Errors.Select(e => $"{e.PropertyName}: {e.ErrorMessage}"));
+                var errors = new ErrorDetails(400, "Validacion fallida", HttpContext.Request.Path, validationErrors);
+                return new StandardResponse<UserApiResponse>(false, "Ah ocurrido un error", null, errors);
+            }
+            
+            var userToUpdate = UserMapper.ToDomain(request);
+            userToUpdate.Id = existingUser.Id; // Mantener el mismo Id
+
+            var updatedUser = await _userService.Update(userToUpdate);
+            var response = UserMapper.ToResponse(updatedUser);
+
+            return Ok(new StandardResponse<UserApiResponse>(
+                Success: true,
+                Message: "Usuario actualizado exitosamente",
+                Data: response
+            ));
+
+        }
+
         // //////////////////////////////////////////
 
     }
