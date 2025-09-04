@@ -25,9 +25,14 @@ namespace org.pos.software.Application.Services
             return await _roleRepository.Save(role);
         }
 
-        public Task<Role> UpdateRolePermissions(string roleName, IEnumerable<string> addPermissions, IEnumerable<string> removePermissions)
+        public async Task<Role> UpdateRolePermissions(string roleName, IEnumerable<string> addPermissions, IEnumerable<string> removePermissions)
         {
-            return _roleRepository.UpdatePermissions(roleName, addPermissions, removePermissions);
+            return await _roleRepository.UpdatePermissions(roleName, addPermissions, removePermissions);
+        }
+
+        public async Task<List<Role>> GetAllRoles(bool includePermissions = false)
+        {
+            return await _roleRepository.FindAll(includePermissions);
         }
     }
 
