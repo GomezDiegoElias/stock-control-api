@@ -20,6 +20,11 @@ namespace org.pos.software.Application.Services
             _roleRepository = roleRepository;
         }
 
+        public async Task<User> DeleteLogic(long dni)
+        {
+            return await _userRepository.DeleteLogic(dni);
+        }
+
         public async Task<User> DeletePermanent(long dni)
         {
             return await _userRepository.DeletePermanent(dni);
