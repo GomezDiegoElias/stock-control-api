@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 using org.pos.software.Domain.Exceptions;
-using org.pos.software.Infrastructure.Persistence.MySql;
 using org.pos.software.Infrastructure.Persistence.SqlServer;
 using org.pos.software.Infrastructure.Rest.Dto.Response.General;
 using org.pos.software.Utils.Seeder;

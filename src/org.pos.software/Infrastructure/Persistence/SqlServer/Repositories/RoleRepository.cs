@@ -17,6 +17,32 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
             _context = context;
         }
 
+        // Retorna todos los roles, con opcion de incluir permisos
+        public async Task<List<Role>> FindAll(bool includePermissions = false)
+        {
+            // El 'IQueryable' permite construir consultas dinamicamente
+            // Si se usara 'DbSet' directamente, se ejecutaria la consulta inmediatamente
+            // y no se podria agregar condiciones adicionales como 'Include'
+            // Por eso se usa 'IQueryable' para construir la consulta y luego ejecutarla con 'ToListAsync'
+            IQueryable<RoleEntity> query = _context.Roles;
+
+            // Si se indica, incluye los permisos asociados a cada rol
+            if (includePermissions)
+            {
+                query = query
+                    .Include(r => r.RolePermissions)
+                    .ThenInclude(rp => rp.Permission);
+            }
+
+            // Ejecuta la consulta y obtiene la lista de entidades
+            var entities = await query.ToListAsync();
+
+            // Mapea las entidades a objetos de dominio y retorna la lista
+            return entities.Select(r => RoleMapper.ToDomain(r)).ToList();
+
+        }
+
+
         public async Task<Role?> FindByName(string name)
         {
             var entity = await _context.Roles

@@ -129,6 +129,9 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
                 .Property(u => u.Status)
                 .HasConversion<string>(); // Almacenar Status como string
 
+            modelBuilder.Entity<UserEntity>()
+                .HasQueryFilter(u => u.Status != Status.DELETED); // Filtro global para soft delete
+
             modelBuilder.Entity<RolePermissionEntity>()
                 .HasOne(rp => rp.Role)
                 .WithMany(r => r.RolePermissions)

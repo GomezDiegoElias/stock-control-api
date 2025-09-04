@@ -6,6 +6,7 @@
         string Password,
         string FirstName,
         string LastName,
+        string Status,
         string Role
     ) { }
 }
