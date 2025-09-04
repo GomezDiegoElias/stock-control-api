@@ -83,5 +83,18 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Mappers
                 .Build();
         }
 
+        public static UserApiRequest ToRequest(User domain)
+        {
+            return new UserApiRequest(
+                    domain.Dni,
+                    domain.Email,
+                    "PROXIMAMENTE", // No se devuelve la contraseña real por seguridad
+                    domain.FirstName,
+                    domain.LastName ?? string.Empty,
+                    domain.Status.ToString(),
+                    domain.Role.Name ?? string.Empty
+                );
+        }
+
     }
 }
