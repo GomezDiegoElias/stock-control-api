@@ -37,6 +37,7 @@ public static class DependencyInjection
                 services.AddScoped<IUserRepository, UserRepository>();
                 services.AddScoped<IRoleRepository, RoleRepository>();
                 services.AddScoped<IClientRepository, ClientRepository>();
+                services.AddScoped<IEmployeeRepository, EmployeeRepository>();
                 break;
             default:
                 throw new InvalidOperationException($"Proveedor de base de datos no soportado: {dbProvider}");
@@ -86,6 +87,7 @@ public static class DependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IClientService, ClientService>();
+        services.AddScoped<IEmployeeService, EmployeeService>();
 
     }
 }
