@@ -25,11 +25,15 @@ namespace org.pos.software.Infrastructure.Rest.Controllers
         [HttpGet]
         public async Task<ActionResult<StandardResponse<PaginatedResponse<EmployeeApiResponse>>>> GetAllEmployees (
             [FromQuery] int pageIndex = 1, 
-            [FromQuery] int pageSize = 5
+            [FromQuery] int pageSize = 5,
+            [FromQuery] int? dni = null,
+            [FromQuery] string? firstname = null,
+            [FromQuery] string? lastname = null,
+            [FromQuery] string? workstation = null
         )
         {
 
-            var employees = await _employeeService.FindAll(pageIndex, pageSize);
+            var employees = await _employeeService.FindAll(pageIndex, pageSize, dni, firstname, lastname, workstation);
             var response = employees.Items.Select(e => EmployeeMapper.ToResponse(e)).ToList();
 
             var paginatedResponse = new PaginatedResponse<EmployeeApiResponse>
