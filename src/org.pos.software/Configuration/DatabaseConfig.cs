@@ -23,6 +23,13 @@ public static class DatabaseConfig
         dbContext.Database.EnsureCreated();
     }
 
+    public static void EnsureDatabaseMigrated(WebApplication app, IConfiguration configuration)
+    {
+        using var scope = app.Services.CreateScope();
+        var dbContext = GetDbContext(scope.ServiceProvider, configuration);
+        dbContext.Database.Migrate(); // aplica migraciones pendientes
+    }
+
     internal static void ConfigureSqlServer(IServiceCollection services, string connectionString)
     {
         services.AddDbContext<AppDbContext>(options =>
