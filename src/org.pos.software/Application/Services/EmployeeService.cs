@@ -15,9 +15,9 @@ namespace org.pos.software.Application.Services
             _employeeRepository = employeeRepository;
         }
 
-        public async Task<PaginatedResponse<Employee>> FindAll(int pageIndex, int pageSize)
+        public async Task<PaginatedResponse<Employee>> FindAll(int pageIndex, int pageSize, int? dni, string? firstname, string? lastname, string? workstation)
         {
-            return await _employeeRepository.FindAll(pageIndex, pageSize);
+            return await _employeeRepository.FindAll(pageIndex, pageSize, dni, firstname, lastname, workstation);
         }
     }
 }
