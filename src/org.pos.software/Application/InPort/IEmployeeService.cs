@@ -5,6 +5,6 @@ namespace org.pos.software.Application.InPort
 {
     public interface IEmployeeService
     {
-        public Task<PaginatedResponse<Employee>> FindAll(int pageIndex, int pageSize);
+        public Task<PaginatedResponse<Employee>> FindAll(int pageIndex, int pageSize, int? dni, string? firstname, string? lastname, string? workstation);
     }
 }
