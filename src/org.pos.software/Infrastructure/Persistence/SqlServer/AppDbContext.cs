@@ -1,9 +1,10 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using System.Data;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using org.pos.software.Domain.Entities;
 using org.pos.software.Infrastructure.Persistence.SqlServer.Entities;
 using org.pos.software.Infrastructure.Rest.Dto.Response.General;
-using System.Data;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace org.pos.software.Infrastructure.Persistence.SqlServer
 {
@@ -114,7 +115,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
         }
 
         // Metodo para la paginacion de empleados
-        public async Task<PaginatedResponse<Employee>> getEmployeePagination(int pageIndex, int pageSize)
+        public async Task<PaginatedResponse<Employee>> getEmployeePagination(int pageIndex, int pageSize, int? dni, string? firstname, string? lastname, string? workstation)
         {
 
             var employees = new List<Employee>();
@@ -122,12 +123,17 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
             
             using var connection = new SqlConnection(Database.GetConnectionString());
             await connection.OpenAsync();
-            
+
             using var command = new SqlCommand("getEmployeePagination", connection);
             command.CommandType = CommandType.StoredProcedure;
-            command.Parameters.AddWithValue("@PageIndex", pageIndex);
-            command.Parameters.AddWithValue("@PageSize", pageSize);
-            
+
+            command.Parameters.Add("@Dni", SqlDbType.Int).Value = (object?)dni ?? DBNull.Value;
+            command.Parameters.Add("@FirstName", SqlDbType.NVarChar, 100).Value = (object?)firstname ?? DBNull.Value;
+            command.Parameters.Add("@LastName", SqlDbType.NVarChar, 100).Value = (object?)lastname ?? DBNull.Value;
+            command.Parameters.Add("@Workstation", SqlDbType.NVarChar, 100).Value = (object?)workstation ?? DBNull.Value;
+            command.Parameters.Add("@PageIndex", SqlDbType.Int).Value = pageIndex;
+            command.Parameters.Add("@PageSize", SqlDbType.Int).Value = pageSize;
+
             using var reader = await command.ExecuteReaderAsync();
             
             while (await reader.ReadAsync())
