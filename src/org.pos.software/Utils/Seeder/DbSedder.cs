@@ -243,7 +243,11 @@ namespace org.pos.software.Utils.Seeder
             ");
 
             await context.Database.ExecuteSqlRawAsync(@"
-                CREATE PROCEDURE getEmployeePagination 
+                CREATE PROCEDURE getEmployeePagination
+                    @Dni INT = NULL,
+                    @FirstName NVARCHAR(100) = NULL,
+                    @LastName NVARCHAR(100) = NULL,
+                    @Workstation NVARCHAR(100) = NULL,
                     @PageIndex INT = 1,
                     @PageSize INT = 10
                 AS
@@ -255,13 +259,16 @@ namespace org.pos.software.Utils.Seeder
                         e.first_name,
                         e.last_name,
                         e.workstation,
-                        ROW_NUMBER() OVER(ORDER BY e.dni ASC) AS Fila,
+                        ROW_NUMBER() OVER(ORDER BY e.first_name ASC) AS Fila,
                         COUNT(*) OVER() AS TotalFilas
                     FROM tbl_employee e
                     WHERE e.is_deleted = 0
+                        AND (@Dni IS NULL OR e.dni = @Dni)
+                        AND (@FirstName IS NULL OR e.first_name LIKE '%' + @FirstName + '%')
+                        AND (@LastName IS NULL OR e.last_name LIKE '%' + @LastName + '%')
+                        AND (@Workstation IS NULL OR e.workstation LIKE '%' + @Workstation + '%')
                     ORDER BY e.first_name ASC
-                    OFFSET @Offset ROWS
-                    FETCH NEXT @PageSize ROWS ONLY
+                    OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
                 END
             ");
         }
