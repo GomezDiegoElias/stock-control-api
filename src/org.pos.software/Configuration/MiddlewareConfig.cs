@@ -33,6 +33,7 @@ public static class MiddlewareConfig
                         UserNotFoundException => 404,
                         ClientNotFoundException => 404,
                         RoleNotFoundException => 404,
+                        EmployeeNotFoundException => 404,
                         _ => 500 // Internal Server
                     };
 
@@ -89,21 +90,21 @@ public static class MiddlewareConfig
         app.UseAuthorization();
         app.MapControllers().RequireRateLimiting("fijo");
 
-        using var scope = app.Services.CreateScope();
+        //using var scope = app.Services.CreateScope();
 
         //var db = scope.ServiceProvider.GetRequiredService<MySqlDbContext>();
         //await MySqlDbSedder.SeedRolesAndPermissions(db);
         //await MySqlDbSedder.SeedUserWhitDiferentRoles(db);
 
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        //var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        await DbSedder.SeedRolesAndPermissions(db); // sedeer para roles y permisos
-        await DbSedder.SeedUserWhitDiferentRoles(db); // sedeer para usuarios con diferentes roles
+        //await DbSedder.SeedRolesAndPermissions(db); // sedeer para roles y permisos
+        //await DbSedder.SeedUserWhitDiferentRoles(db); // sedeer para usuarios con diferentes roles
 
         // sedeer para procedimientos almacenados de paginacion
-        await DbSedder.SeedStoredProceduresPaginationUser(db); 
-        await DbSedder.SeedStoredProceduresPaginationClient(db);
-        await DbSedder.SeedStoredProceduresPaginationEmployee(db);
+        //await DbSedder.SeedStoredProceduresPaginationUser(db); 
+        //await DbSedder.SeedStoredProceduresPaginationClient(db);
+        //await DbSedder.SeedStoredProceduresPaginationEmployee(db);
 
     }
 }
