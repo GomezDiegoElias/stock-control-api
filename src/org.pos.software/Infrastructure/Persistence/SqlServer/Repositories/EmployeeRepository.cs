@@ -14,9 +14,9 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer.Repositories
             _context = context;
         }
 
-        public async Task<PaginatedResponse<Employee>> FindAll(int pageIndex, int pageSize)
+        public async Task<PaginatedResponse<Employee>> FindAll(int pageIndex, int pageSize, int? dni, string? firstname, string? lastname, string? workstation)
         {
-            return await _context.getEmployeePagination(pageIndex, pageSize);
+            return await _context.getEmployeePagination(pageIndex, pageSize, dni, firstname, lastname, workstation);
         }
     }
 }
