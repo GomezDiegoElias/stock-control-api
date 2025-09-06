@@ -17,6 +17,7 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
         public DbSet<PermissionEntity> Permissions { get; set; }
         public DbSet<RolePermissionEntity> RolePermissions { get; set; }
         public DbSet<ClientEntity> Clients { get; set; }
+        public DbSet<EmployeeEntity> Employees { get; set; }
 
         // Metodo para la paginacion de usuarios
         public async Task<PaginatedResponse<User>> getUserPagination(int pageIndex, int pageSize)
@@ -112,6 +113,51 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
             };
         }
 
+        // Metodo para la paginacion de empleados
+        public async Task<PaginatedResponse<Employee>> getEmployeePagination(int pageIndex, int pageSize)
+        {
+
+            var employees = new List<Employee>();
+            var totalItems = 0;
+            
+            using var connection = new SqlConnection(Database.GetConnectionString());
+            await connection.OpenAsync();
+            
+            using var command = new SqlCommand("getEmployeePagination", connection);
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("@PageIndex", pageIndex);
+            command.Parameters.AddWithValue("@PageSize", pageSize);
+            
+            using var reader = await command.ExecuteReaderAsync();
+            
+            while (await reader.ReadAsync())
+            {
+                employees.Add(new Employee(
+                        Convert.ToInt64(reader["dni"]),
+                        reader["first_name"].ToString(),
+                        reader["last_name"].ToString(),
+                        reader["workstation"].ToString()
+                        ));
+                if (totalItems == 0)
+                {
+                    totalItems = Convert.ToInt32(reader["TotalFilas"]);
+                }
+            }
+
+            await connection.CloseAsync();
+
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+            
+            return new PaginatedResponse<Employee>
+            {
+                Items = employees,
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                TotalItems = totalItems,
+                TotalPages = totalPages
+            };
+
+        }
 
         // Configuracion del modelo de datos
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -167,6 +213,14 @@ namespace org.pos.software.Infrastructure.Persistence.SqlServer
 
             modelBuilder.Entity<ClientEntity>()
                 .HasQueryFilter(c => !c.IsDeleted); // Filtro global para soft delete
+
+            // EMPLOYEE
+            modelBuilder.Entity<EmployeeEntity>()
+                .HasIndex(e => e.Dni)
+                .IsUnique();
+
+            modelBuilder.Entity<EmployeeEntity>()
+                .HasQueryFilter(e => !e.IsDeleted); // Filtro global para soft delete
 
         }
 
